@@ -1,0 +1,193 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="using:Shavkat_grabber.Models"
+        xmlns:vm="using:Shavkat_grabber.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:conv="using:Shavkat_grabber.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Shavkat_grabber.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/PNG/SG_Logo_128.png"
+        Title="Shavkat Grabber"
+        WindowStartupLocation="CenterScreen">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+    
+    <Window.Resources>
+        <conv:MessageTypeToBrushConverter x:Key="messageTypeToBrushConverter"/>
+    </Window.Resources>
+    
+    <Window.Styles>
+        <Style Selector="DockPanel > Border">
+            <Setter Property="Padding" Value="4 2"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="Gray"/>
+        </Style>
+        <Style Selector="TreeViewItem">
+            <Setter Property="IsExpanded" Value="{Binding (m:TreeViewNodeGroup).IsExpanded}"/>
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <Border DockPanel.Dock="Top">
+
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" 
+                            Orientation="Horizontal"
+                            Spacing="5">
+
+                <Button Command="{Binding Start}"
+                        IsEnabled="{Binding !IsLoading}"
+                        FontSize="16"
+                        HorizontalContentAlignment="Center"
+                        BorderBrush="#32BEA6"
+                        BorderThickness="1">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="4">
+                        <Image Source="../Assets/PNG/start-64.png"
+                               Width="25"/>
+                        <TextBlock Text="Запуск"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding CreatePost}"
+                        FontSize="16"
+                        HorizontalContentAlignment="Center"
+                        BorderBrush="#29B6F6"
+                        BorderThickness="1">
+                    <Button.IsEnabled>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="!IsLoading"/>
+                            <Binding Path="!!CheckedCount"/>
+                        </MultiBinding>
+                    </Button.IsEnabled>
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="4">
+                        <Image Source="../Assets/PNG/telegram-48.png"
+                               Width="25"/>
+                        <TextBlock Text="Создать пост"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <SplitButton Content="Экспорт в XLSX"
+                             Command="{Binding Export}"
+                             CommandParameter="xlsx"
+                             FontSize="16">
+                    <Button.IsEnabled>
+                        <MultiBinding Converter="{x:Static BoolConverters.And}">
+                            <Binding Path="!IsLoading"/>
+                            <Binding Path="!!CheckedCount"/>
+                        </MultiBinding>
+                    </Button.IsEnabled>
+                    <SplitButton.Flyout>
+                        <MenuFlyout>
+                            <MenuItem Header="Экспорт в CSV"
+                                      Command="{Binding Export}"
+                                      CommandParameter="csv"/>
+                        </MenuFlyout>
+                    </SplitButton.Flyout>
+                </SplitButton>
+            </StackPanel>
+
+                <Button Grid.Column="1"
+                        Command="{Binding ShowSettings}"
+                        IsEnabled="{Binding !IsLoading}"
+                        FontSize="16"
+                        HorizontalContentAlignment="Center"
+                        BorderBrush="#455A64"
+                        BorderThickness="1">
+                    <StackPanel Orientation="Horizontal"
+                                Spacing="4">
+                        <Image Source="../Assets/PNG/settings-48.png"
+                               Width="25"/>
+                        <TextBlock Text="Настройки"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+            </Grid>
+            
+
+        </Border>
+        
+        <Border DockPanel.Dock="Bottom">
+            <Grid RowDefinitions="*,*">
+
+                <StackPanel Grid.Row="0"
+                            Orientation="Horizontal"
+                            Spacing="5">
+                    <StackPanel Orientation="Vertical"
+                                HorizontalAlignment="Left">
+                    <TextBlock Text="Количество"/>
+                    <NumericUpDown Value="{Binding SelectedCount, Mode=TwoWay}"
+                                   Minimum="1"
+                                   Maximum="5"
+                                   Width="100"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <ListBox Grid.Row="1"
+                         Name="ListboxLog"
+                         ItemsSource="{Binding LogMessages}"
+                         Height="130"
+                         Background="Black">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate DataType="m:LogMessage">
+                            <TextBlock Foreground="{Binding MessageType, Converter={StaticResource messageTypeToBrushConverter}}">
+                                <Run Text="{Binding CreateTime}"/>
+                                <Run Text="{Binding MessageType}"/>
+                                <Run Text="{Binding Message}"/>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                
+            </Grid>
+
+        </Border>
+        
+        <Border>
+            <Grid ColumnDefinitions="220,*">
+                <Border Grid.Column="0">
+                <TreeView ItemsSource="{Binding Root}"
+                          ScrollViewer.VerticalScrollBarVisibility="Visible"
+                          ScrollViewer.AllowAutoHide="False">
+                    <TreeView.DataTemplates>
+                        <TreeDataTemplate DataType="m:TreeViewNodeGroup" ItemsSource="{Binding Children}">
+                            <TextBlock Text="{Binding Title}"/>
+                        </TreeDataTemplate>
+                        <TreeDataTemplate DataType="m:TreeViewNodeItem">
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox Content="{Binding Title}"
+                                          IsChecked="{Binding IsChecked}"
+                                          FontSize="11"/>
+                            </StackPanel>
+                        </TreeDataTemplate>
+                    </TreeView.DataTemplates>
+                </TreeView>
+                </Border>
+                
+                <ScrollViewer Grid.Column="1"
+                              AllowAutoHide="False"
+                              HorizontalScrollBarVisibility="Visible"
+                              VerticalScrollBarVisibility="Visible">
+                    <TreeDataGrid Source="{Binding Items}"/>
+                </ScrollViewer>
+            </Grid>
+            
+        </Border>
+
+
+    </DockPanel>
+
+</Window>
