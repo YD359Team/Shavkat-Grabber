@@ -8,12 +8,18 @@ public class ViewModelBase : ReactiveObject { }
 
 public class ChildViewModel : ViewModelBase
 {
-    protected WindowManager Manager { get; }
+    protected FileSystemManager FsManager { get; }
+    protected WindowManager WinManager { get; }
     protected AppSettings Settings { get; }
 
-    public ChildViewModel(WindowManager windowManager, AppSettings settings)
+    public ChildViewModel(
+        FileSystemManager fsManager,
+        WindowManager winManager,
+        AppSettings settings
+    )
     {
-        Manager = windowManager;
+        FsManager = fsManager;
+        WinManager = winManager;
         Settings = settings;
     }
 }

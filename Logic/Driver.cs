@@ -21,25 +21,35 @@ public class Driver
     private readonly IPlaywright _playwright;
     private readonly IBrowser _browser;
     private readonly IPage _page;
+    private readonly FileSystemManager _fsManager;
 
     public event LogMessageDelegate OnLogMessage;
     public event EventHandler OnScaningEnd;
 
-    private Driver(IPlaywright playwright, IBrowser browser, IPage page)
+    private Driver(
+        IPlaywright playwright,
+        IBrowser browser,
+        IPage page,
+        FileSystemManager fsManager
+    )
     {
         _playwright = playwright;
         _browser = browser;
         _page = page;
+        _fsManager = fsManager;
     }
 
-    public static async Task<Driver> CreateAsync(AppSettings appSettings)
+    public static async Task<Driver> CreateAsync(
+        FileSystemManager fsManager,
+        AppSettings appSettings
+    )
     {
         var playwright = await Playwright.CreateAsync();
         var browser = await playwright.Chromium.LaunchAsync(
             new() { Headless = false, ExecutablePath = appSettings.ChromePath }
         );
         var page = await browser.NewPageAsync();
-        return new Driver(playwright, browser, page);
+        return new Driver(playwright, browser, page, fsManager);
     }
 
     public async IAsyncEnumerable<Good> StartGrab(string[] keyWords, int count)
@@ -109,7 +119,7 @@ public class Driver
         await DisposeAsync();
     }
 
-    public async Task PostInPinterest()
+    public async Task PostInPinterest(Bitmap[] attachments)
     {
         await _page.GotoAsync("https://ru.pinterest.com/");
         await Task.Delay(1000);
@@ -197,73 +207,5 @@ public class Driver
         await _page.CloseAsync();
         await _browser.CloseAsync();
         _playwright.Dispose();
-    }
-
-    public async Task RemoveBackground(ObservableCollection<PreviewImage> attachments)
-    {
-        string[] fileNames = SaveBitmaps(attachments.Select(x => x.Image));
-
-        await _page.GotoAsync("https://www.remove.bg/ru/upload");
-        await Task.Delay(1750);
-
-        var chooser = _page.WaitForFileChooserAsync();
-        await _page.GetByText("Загрузить изображение").ClickAsync();
-        await chooser.Result.SetFilesAsync(fileNames.First());
-
-        if (fileNames.Length > 1)
-        {
-            await Task.Delay(1500);
-            foreach (var fileName in fileNames.Skip(1))
-            {
-                chooser = _page.WaitForFileChooserAsync();
-                await _page.ClickAsync("#footer button");
-                await chooser.Result.SetFilesAsync(fileName);
-                await Task.Delay(1500);
-            }
-        }
-
-        await Task.Delay(1500 + 750 * fileNames.Length);
-
-        var previews = await _page.QuerySelectorAllAsync("img.checkerboard");
-        int index = 0;
-        foreach (var prev in previews)
-        {
-            await prev.ClickAsync();
-            await Task.Delay(500);
-            var downloader = _page.WaitForDownloadAsync();
-            await _page.GetByText("Скачать ").ClickAsync();
-            await downloader.Result.SaveAsAsync(fileNames[index]);
-            index++;
-        }
-    }
-
-    private string[] SaveBitmaps(IEnumerable<Bitmap> attachments)
-    {
-        string path = Path.Combine(Environment.CurrentDirectory, "Temp");
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-        else
-        {
-            foreach (string file in Directory.GetFiles(path))
-            {
-                File.Delete(file);
-            }
-        }
-
-        string[] arr = new string[attachments.Count()];
-        int i = 0;
-        foreach (var bmp in attachments)
-        {
-            string fullName = Path.Combine(path, $"img{i}.png");
-            arr[i] = fullName;
-            Console.WriteLine($"save file {fullName}");
-
-            bmp.Save(fullName);
-            i++;
-        }
-
-        return arr;
     }
 }

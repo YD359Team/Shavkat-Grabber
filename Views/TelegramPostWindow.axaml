@@ -154,11 +154,14 @@
                         <StackPanel Grid.Column="0" 
                                     Orientation="Vertical">
                             <Button IsEnabled="{Binding IsAsyncDataLoaded}"
-                                    Command="{Binding RemoveBackground}">
+                                    Command="{Binding SaveAllPreview}"
+                                    BorderBrush="DodgerBlue"
+                                    BorderThickness="1">
                                 <StackPanel Orientation="Horizontal"
                                             Spacing="2">
-                                    <Image Source="../Assets/PNG/magic-40.png"/>
-                                    <TextBlock Text="Убрать фон"
+                                    <Image Source="../Assets/PNG/save-all-64.png"
+                                           Width="32"/>
+                                    <TextBlock Text="Сохранить все"
                                                VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>

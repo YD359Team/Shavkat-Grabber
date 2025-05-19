@@ -19,7 +19,8 @@ namespace Shavkat_grabber.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private WindowManager _manager;
+    private FileSystemManager _fsManager;
+    private WindowManager _winManager;
     private AppSettings _settings;
 
     public List<TreeViewNode> Root { get; } =
@@ -96,9 +97,6 @@ public class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<LogMessage> LogMessages { get; } = new();
 
-    private readonly FilePickerFileType[] fileTypesCsv = [new("CSV") { Patterns = ["*.csv"] }];
-    private readonly FilePickerFileType[] fileTypesXlsx = [new("XLSX") { Patterns = ["*.xlsx"] }];
-
     public MainWindowViewModel() { }
 
     public MainWindowViewModel(MainWindow mainWindow)
@@ -132,7 +130,8 @@ public class MainWindowViewModel : ViewModelBase
             },
         };
 
-        _manager = new(mainWindow);
+        _fsManager = new();
+        _winManager = new(mainWindow);
     }
 
     private void LoadSettingsOrCreate()
@@ -161,7 +160,7 @@ public class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        Driver driver = await Driver.CreateAsync(_settings);
+        Driver driver = await Driver.CreateAsync(_fsManager, _settings);
         driver.OnLogMessage += OnLogMessage;
         driver.OnScaningEnd += OnDriverOnOnScaningEnd;
         await foreach (var item in driver.StartGrab(keyWords, SelectedCount))
@@ -185,7 +184,7 @@ public class MainWindowViewModel : ViewModelBase
         Dispatcher.UIThread.Post(
             x =>
             {
-                _manager.MainWindow.ScrollListBox(logMessage);
+                _winManager.MainWindow.ScrollListBox(logMessage);
             },
             null
         );
@@ -193,42 +192,27 @@ public class MainWindowViewModel : ViewModelBase
 
     public async void Export(object eFormat)
     {
-        string format = eFormat.ToString();
-        var topLevel = TopLevel.GetTopLevel(_manager.MainWindow);
+        string formatStr = SerializeHelper.Serialize(eFormat);
+        var format = Enum.Parse<WindowManager.SaveFileFormats>(formatStr.ToUpperInvariant());
+        string? path = await _winManager.SaveFileDialog(format);
 
-        var options = new FilePickerSaveOptions();
-        if (format == "csv")
+        if (path is null)
         {
-            options.FileTypeChoices = fileTypesCsv;
-        }
-        else if (format == "xlsx")
-        {
-            options.FileTypeChoices = fileTypesXlsx;
-        }
-        else
-        {
-            throw new NotImplementedException();
-        }
-
-        using var file = await topLevel.StorageProvider.SaveFilePickerAsync(options);
-        if (file is null)
             return;
+        }
 
         Exporter export = new();
-        if (format == "csv")
+        if (formatStr == "csv")
         {
             await export.ToCsv(
                 _items.Where(x => x.IsChecked).Select(x => x.Good),
-                await file.OpenWriteAsync()
+                File.OpenWrite(path)
             );
             ShowSuccess("Сохранено");
         }
-        else if (format == "xlsx")
+        else if (formatStr == "xlsx")
         {
-            await export.ToXlsx(
-                _items.Where(x => x.IsChecked).Select(x => x.Good),
-                file.Path.AbsolutePath
-            );
+            await export.ToXlsx(_items.Where(x => x.IsChecked).Select(x => x.Good), path);
             ShowSuccess("Сохранено");
         }
     }
@@ -238,17 +222,22 @@ public class MainWindowViewModel : ViewModelBase
         Good[] goods = _items.Where(x => x.IsChecked).Select(x => x.Good).ToArray();
 
         TelegramPostWindow tgPostWindow = new();
-        tgPostWindow.DataContext = new TelegramPostWindowViewMode(_manager, _settings, goods);
-        await tgPostWindow.ShowDialog(_manager.MainWindow);
+        tgPostWindow.DataContext = new TelegramPostWindowViewMode(
+            _fsManager,
+            _winManager,
+            _settings,
+            goods
+        );
+        await tgPostWindow.ShowDialog(_winManager.MainWindow);
     }
 
     public async void ShowSettings()
     {
         SettingsWindow settingsWindow = new();
-        settingsWindow.DataContext = new SettingsWindowViewMode(_manager, _settings);
+        settingsWindow.DataContext = new SettingsWindowViewMode(_fsManager, _winManager, _settings);
 
         AppSettings? newSettings = await settingsWindow.ShowDialog<AppSettings>(
-            _manager.MainWindow
+            _winManager.MainWindow
         );
         if (newSettings is null)
             return;
@@ -262,6 +251,11 @@ public class MainWindowViewModel : ViewModelBase
 
     public void ShowSuccess(string msg)
     {
-        _manager.MainWindow.ShowNotification("Успех", msg, NotificationType.Success);
+        _winManager.MainWindow.ShowNotification("Успех", msg, NotificationType.Success);
+    }
+
+    public void ShowError(string msg)
+    {
+        _winManager.MainWindow.ShowNotification("Ошибка", msg, NotificationType.Error);
     }
 }

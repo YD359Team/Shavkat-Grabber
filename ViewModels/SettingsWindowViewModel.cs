@@ -10,10 +10,14 @@ public class SettingsWindowViewMode : ChildViewModel
     public AppSettings AppSettings { get; set; }
 
     public SettingsWindowViewMode()
-        : base(null, null) { }
+        : base(null, null, null) { }
 
-    public SettingsWindowViewMode(WindowManager manager, AppSettings? currentSettings)
-        : base(manager, currentSettings)
+    public SettingsWindowViewMode(
+        FileSystemManager fsManager,
+        WindowManager manager,
+        AppSettings? currentSettings
+    )
+        : base(fsManager, manager, currentSettings)
     {
         AppSettings = new()
         {

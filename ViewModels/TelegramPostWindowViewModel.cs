@@ -67,7 +67,7 @@ public class TelegramPostWindowViewMode : ChildViewModel
         set => this.RaiseAndSetIfChanged(ref _postTelegram, value);
     }
 
-    private bool _postpinterest = true;
+    private bool _postpinterest = false;
     public bool PostPinterest
     {
         get => _postpinterest;
@@ -84,10 +84,10 @@ public class TelegramPostWindowViewMode : ChildViewModel
     public ObservableCollection<PreviewImage> Attachments { get; } = new();
 
     public TelegramPostWindowViewMode()
-        : base(null, null) { }
+        : base(null, null, null) { }
 
-    public TelegramPostWindowViewMode(WindowManager manager, AppSettings appSettings, Good[] goods)
-        : base(manager, appSettings)
+    public TelegramPostWindowViewMode(FileSystemManager fsManager, WindowManager manager, AppSettings appSettings, Good[] goods)
+        : base(fsManager, manager, appSettings)
     {
         _goods = goods;
         _gigaChatApi = new(appSettings.GigaChatAuthKey, appSettings.GigaChatScope);
@@ -242,13 +242,13 @@ public class TelegramPostWindowViewMode : ChildViewModel
 
             if (PostPinterest)
             {
-                Driver driver = await Driver.CreateAsync(Settings);
-                await driver.PostInPinterest();
+                Driver driver = await Driver.CreateAsync(FsManager, Settings);
+                //TODO: await driver.PostInPinterest();
             }
         }
         catch (Exception ex)
         {
-            await Manager.ShowError(ex);
+            await WinManager.ShowError(ex);
         }
         finally
         {
@@ -306,7 +306,7 @@ public class TelegramPostWindowViewMode : ChildViewModel
         }
         catch (Exception ex)
         {
-            await Manager.ShowError(ex);
+            await WinManager.ShowError(ex);
         }
         finally
         {
@@ -352,7 +352,7 @@ public class TelegramPostWindowViewMode : ChildViewModel
 
         DataObject obj = new();
         obj.Set("image/png", stream.ToArray());
-        await Manager.MainWindow.Clipboard.SetDataObjectAsync(obj);
+        await WinManager.MainWindow.Clipboard.SetDataObjectAsync(obj);
     }
 
     public void MorphText(int from, int to, string separator)
@@ -377,22 +377,12 @@ public class TelegramPostWindowViewMode : ChildViewModel
         PostText = s2;
     }
 
-    public async void RemoveBackground()
+    public async void SaveAllPreview()
     {
-        try
+        foreach (var attach in Attachments)
         {
-            IsAsyncDataLoaded = false;
-
-            Driver driver = await Driver.CreateAsync(Settings);
-            await driver.RemoveBackground(Attachments);
-        }
-        catch (Exception ex)
-        {
-            await Manager.ShowError(ex);
-        }
-        finally
-        {
-            IsAsyncDataLoaded = true;
+            string path = await WinManager.SaveFileDialog(WindowManager.SaveFileFormats.PNG);
+            attach.Image.Save(path);
         }
     }
 }
