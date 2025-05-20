@@ -70,7 +70,8 @@
                          Name="tbStaticHeader"
                          Text="{Binding AppSettings.StaticHeader, Mode=OneTime}"
                          Height="130"
-                         AcceptsReturn="True"/>
+                         AcceptsReturn="True"
+                         FontFamily="monospaced"/>
                 <TextBlock Grid.Row="7" Grid.Column="0" 
                            Text="Статичный футер [?]"
                            ToolTip.Tip="Вставляется в конце текста вместе с новой строкой"/>
@@ -78,7 +79,8 @@
                          Name="tbStaticFooter"
                          Text="{Binding AppSettings.StaticFooter, Mode=OneTime}"
                          Height="130"
-                         AcceptsReturn="True"/>
+                         AcceptsReturn="True"
+                         FontFamily="monospaced"/>
                 <!-- Remove bg -->
                 <TextBlock Grid.Row="8" Grid.Column="0" 
                            Text="Путь к файлу remove-bg-cli.exe"/>

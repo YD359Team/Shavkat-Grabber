@@ -8,12 +8,12 @@ using Telegram.Bot.Types.Enums;
 
 namespace Shavkat_grabber.Logic;
 
-public class Telegram
+public class TelegramBotApi
 {
     private TelegramBotClient _client;
     private string _chatId;
 
-    public Telegram(string token, string channelId)
+    public TelegramBotApi(string token, string channelId)
     {
         _chatId = channelId;
         _client = new TelegramBotClient(token);

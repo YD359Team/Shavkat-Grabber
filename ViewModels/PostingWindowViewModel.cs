@@ -18,10 +18,10 @@ using Shavkat_grabber.Views;
 
 namespace Shavkat_grabber.ViewModels;
 
-public class TelegramPostWindowViewMode : ChildViewModel
+public class PostingWindowViewModel : ChildViewModel
 {
     private readonly Logic.GigaChatApi _gigaChatApi;
-    private readonly Logic.Telegram _telegram;
+    private readonly Logic.TelegramBotApi _telegram;
 
     private Good[] _goods;
 
@@ -83,10 +83,10 @@ public class TelegramPostWindowViewMode : ChildViewModel
 
     public ObservableCollection<PreviewImage> Attachments { get; } = new();
 
-    public TelegramPostWindowViewMode()
+    public PostingWindowViewModel()
         : base(null, null, null) { }
 
-    public TelegramPostWindowViewMode(FileSystemManager fsManager, WindowManager manager, AppSettings appSettings, Good[] goods)
+    public PostingWindowViewModel(FileSystemManager fsManager, WindowManager manager, AppSettings appSettings, Good[] goods)
         : base(fsManager, manager, appSettings)
     {
         _goods = goods;
@@ -242,7 +242,7 @@ public class TelegramPostWindowViewMode : ChildViewModel
 
             if (PostPinterest)
             {
-                Driver driver = await Driver.CreateAsync(FsManager, Settings);
+                using Driver driver = await Driver.CreateAsync(FsManager, Settings);
                 //TODO: await driver.PostInPinterest();
             }
         }
@@ -286,19 +286,10 @@ public class TelegramPostWindowViewMode : ChildViewModel
 
             var (path, targetPath) = SaveBitmap(bmp);
 
-            Process process = new Process();
-            process.StartInfo.FileName = $"\"{Settings.RemoveBgCliPath}\"";
-            if (string.IsNullOrWhiteSpace(Settings.RemoveBgColor))
-            {
-                process.StartInfo.Arguments = $"--api-key {Settings.RemoveBgApiKey} \"{path}\"";
-            }
-            else
-            {
-                process.StartInfo.Arguments = $"--api-key {Settings.RemoveBgApiKey} \"{path}\" --bg-color {Settings.RemoveBgColor}";
-            }
-            process.StartInfo.UseShellExecute = false;
-            process.Start();
-            await process.WaitForExitAsync();
+            string args = string.IsNullOrWhiteSpace(Settings.RemoveBgColor) 
+                ? $"--api-key {Settings.RemoveBgApiKey} \"{path}\"" 
+                : $"--api-key {Settings.RemoveBgApiKey} \"{path}\" --bg-color {Settings.RemoveBgColor}";
+            await FsManager.StartProcessAndWait(Settings.RemoveBgCliPath, args);
             await Task.Delay(250);
 
             prev.Image = new Bitmap(targetPath);
@@ -317,17 +308,7 @@ public class TelegramPostWindowViewMode : ChildViewModel
     private (string baseName, string targetName) SaveBitmap(Bitmap attachment)
     {
         string path = Path.Combine(Environment.CurrentDirectory, "Temp");
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-        else
-        {
-            foreach (string file in Directory.GetFiles(path))
-            {
-                File.Delete(file);
-            }
-        }
+        FsManager.DirClearOrCreateIfNotExist(path);
 
         string baseName = Path.Combine(path, "img.png");
         string targetName = Path.Combine(path, "img-removebg.png");

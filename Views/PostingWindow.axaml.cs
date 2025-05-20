@@ -9,11 +9,11 @@ using Shavkat_grabber.ViewModels;
 
 namespace Shavkat_grabber.Views;
 
-public partial class TelegramPostWindow : Window
+public partial class PostingWindow : Window
 {
-    private TelegramPostWindowViewMode _vm;
+    private PostingWindowViewModel _vm;
 
-    public TelegramPostWindow()
+    public PostingWindow()
     {
         InitializeComponent();
         Loaded += OnLoaded;
@@ -60,7 +60,7 @@ public partial class TelegramPostWindow : Window
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
-        _vm = (TelegramPostWindowViewMode)DataContext!;
+        _vm = (PostingWindowViewModel)DataContext!;
         tbPost.PastingFromClipboard += TbPostOnPastingFromClipboard;
     }
 

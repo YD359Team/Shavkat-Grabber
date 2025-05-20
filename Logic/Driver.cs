@@ -16,12 +16,14 @@ namespace Shavkat_grabber.Logic;
 
 public delegate void LogMessageDelegate(LogMessage logMessage);
 
-public class Driver
+public class Driver : IDisposable
 {
     private readonly IPlaywright _playwright;
     private readonly IBrowser _browser;
     private readonly IPage _page;
     private readonly FileSystemManager _fsManager;
+
+    private bool _isClosed = false;
 
     public event LogMessageDelegate OnLogMessage;
     public event EventHandler OnScaningEnd;
@@ -116,7 +118,6 @@ public class Driver
             }
         }
         OnScaningEnd?.Invoke(this, EventArgs.Empty);
-        await DisposeAsync();
     }
 
     public async Task PostInPinterest(Bitmap[] attachments)
@@ -202,10 +203,19 @@ public class Driver
         OnLogMessage?.Invoke(logMessage);
     }
 
-    public async ValueTask DisposeAsync()
+    public async Task CloseAsync()
     {
         await _page.CloseAsync();
         await _browser.CloseAsync();
         _playwright.Dispose();
+        _isClosed = true;
+    }
+
+    public void Dispose()
+    {
+        if (!_isClosed)
+        {
+            CloseAsync().Wait();
+        }
     }
 }

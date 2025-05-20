@@ -5,13 +5,13 @@
         xmlns:vm="using:Shavkat_grabber.ViewModels"
         xmlns:m="using:Shavkat_grabber.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Shavkat_grabber.Views.TelegramPostWindow"
-        Title="TelegramPostWindow"
+        x:Class="Shavkat_grabber.Views.PostingWindow"
+        Title="PostingWindow"
         WindowStartupLocation="CenterOwner"
-        x:DataType="vm:TelegramPostWindowViewMode">
+        x:DataType="vm:PostingWindowViewModel">
 
     <Design.DataContext>
-        <vm:TelegramPostWindowViewMode/>
+        <vm:PostingWindowViewModel/>
     </Design.DataContext>
 
     <Window.Styles>
@@ -138,6 +138,7 @@
                     <TextBox Name="tbPost"
                              Text="{Binding PostText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
                              FontSize="16"
+                             FontFamily="monospaced"
                              AcceptsReturn="True"
                              IsUndoEnabled="True"
                              ClearSelectionOnLostFocus="False"
@@ -188,7 +189,7 @@
                                                 <Button Classes="AttachControlButton" 
                                                         Background="White"
                                                         DataContext="{Binding $parent[Window].DataContext}"
-                                                        x:DataType="vm:TelegramPostWindowViewMode"
+                                                        x:DataType="vm:PostingWindowViewModel"
                                                         Command="{Binding RemoveBgAttach}"
                                                         CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
                                                         IsEnabled="{Binding IsAsyncDataLoaded}">
@@ -201,7 +202,7 @@
                                                          Foreground="Black"
                                                          Background="White"
                                                          DataContext="{Binding $parent[Window].DataContext}"
-                                                         x:DataType="vm:TelegramPostWindowViewMode"
+                                                         x:DataType="vm:PostingWindowViewModel"
                                                          Command="{Binding CopyAttach}"
                                                          CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
                                                          IsEnabled="{Binding IsAsyncDataLoaded}"/>
@@ -212,7 +213,7 @@
                                                          Foreground="White"
                                                          Background="Red"
                                                          DataContext="{Binding $parent[Window].DataContext}"
-                                                         x:DataType="vm:TelegramPostWindowViewMode"
+                                                         x:DataType="vm:PostingWindowViewModel"
                                                          Command="{Binding RemoveAttach}"
                                                          CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
                                                          IsEnabled="{Binding IsAsyncDataLoaded}"/>

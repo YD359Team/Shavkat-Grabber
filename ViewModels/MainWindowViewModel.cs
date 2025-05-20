@@ -160,7 +160,7 @@ public class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        Driver driver = await Driver.CreateAsync(_fsManager, _settings);
+        using Driver driver = await Driver.CreateAsync(_fsManager, _settings);
         driver.OnLogMessage += OnLogMessage;
         driver.OnScaningEnd += OnDriverOnOnScaningEnd;
         await foreach (var item in driver.StartGrab(keyWords, SelectedCount))
@@ -221,14 +221,21 @@ public class MainWindowViewModel : ViewModelBase
     {
         Good[] goods = _items.Where(x => x.IsChecked).Select(x => x.Good).ToArray();
 
-        TelegramPostWindow tgPostWindow = new();
-        tgPostWindow.DataContext = new TelegramPostWindowViewMode(
+        PostingWindow tgPostWindow = new();
+        tgPostWindow.DataContext = new PostingWindowViewModel(
             _fsManager,
             _winManager,
             _settings,
             goods
         );
         await tgPostWindow.ShowDialog(_winManager.MainWindow);
+    }
+
+    public async void ShowHelp()
+    {
+        HelpWindow settingsWindow = new();
+        settingsWindow.DataContext = new HelpWindowViewModel(_fsManager, _winManager, _settings);
+        await settingsWindow.ShowDialog(_winManager.MainWindow);
     }
 
     public async void ShowSettings()
