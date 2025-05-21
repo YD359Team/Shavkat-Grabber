@@ -6,6 +6,10 @@ public class Result
 {
     public bool IsSuccess { get; set; }
     public Exception? Error { get; set; }
+
+    public static Result<T> Fail<T>(Exception error) => Result<T>.Fail(error);
+
+    public static Result<T> Success<T>(T value) => Result<T>.Success(value);
 }
 
 public class Result<T> : Result

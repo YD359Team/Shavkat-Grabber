@@ -2,6 +2,9 @@
 
 namespace Shavkat_grabber.Models;
 
+/// <summary>
+/// Сообщения для виртуального лога (консоли) парсинга
+/// </summary>
 public class LogMessage
 {
     public string Message { get; set; }
@@ -24,5 +27,5 @@ public enum LogMessageTypes
     Trace,
     Success,
     Warning,
-    Error
+    Error,
 }

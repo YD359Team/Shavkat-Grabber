@@ -32,6 +32,8 @@ public class SettingsWindowViewMode : ChildViewModel
             RemoveBgCliPath = currentSettings.RemoveBgCliPath,
             RemoveBgApiKey = currentSettings.RemoveBgApiKey,
             RemoveBgColor = currentSettings.RemoveBgColor,
+            PinterestEmail = currentSettings.PinterestEmail,
+            PinterestPassword = currentSettings.PinterestPassword,
         };
     }
 
@@ -49,6 +51,8 @@ public class SettingsWindowViewMode : ChildViewModel
         AppSettings.RemoveBgCliPath = wnd.tbRemoveBgCliPath.Text;
         AppSettings.RemoveBgApiKey = wnd.tbRemoveBgApi.Text;
         AppSettings.RemoveBgColor = wnd.tbRemoveBgColor.Text;
+        AppSettings.PinterestEmail = wnd.tbPinterestEmail.Text;
+        AppSettings.PinterestPassword = wnd.tbPinterestPassword.Text;
         wnd.Close(AppSettings);
     }
 

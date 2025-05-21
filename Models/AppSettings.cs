@@ -3,6 +3,9 @@ using System.IO;
 
 namespace Shavkat_grabber.Models;
 
+/// <summary>
+/// Настройки программы. Все свойства сериализуются
+/// </summary>
 public class AppSettings
 {
     // Playwright
@@ -25,6 +28,10 @@ public class AppSettings
     public string? RemoveBgCliPath { get; set; }
     public string? RemoveBgApiKey { get; set; }
     public string? RemoveBgColor { get; set; }
+
+    // Pinterest
+    public string? PinterestEmail { get; set; }
+    public string? PinterestPassword { get; set; }
 
     public static AppSettings CreateDefault()
     {

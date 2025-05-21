@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +14,7 @@ using DynamicData;
 using ReactiveUI;
 using Shavkat_grabber.Extensions;
 using Shavkat_grabber.Logic;
+using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Views;
 
@@ -60,18 +62,18 @@ public class PostingWindowViewModel : ChildViewModel
         set => this.RaiseAndSetIfChanged(ref this._postText, value);
     }
 
-    private bool _postTelegram = true;
+    private bool _postTelegram = false;
     public bool PostTelegram
     {
         get => _postTelegram;
         set => this.RaiseAndSetIfChanged(ref _postTelegram, value);
     }
 
-    private bool _postpinterest = false;
+    private bool _postPinterest = true;
     public bool PostPinterest
     {
-        get => _postpinterest;
-        set => this.RaiseAndSetIfChanged(ref _postpinterest, value);
+        get => _postPinterest;
+        set => this.RaiseAndSetIfChanged(ref _postPinterest, value);
     }
 
     private bool _postTiktok = false;
@@ -193,7 +195,7 @@ public class PostingWindowViewModel : ChildViewModel
 
     private async Task GetImagesFromGoods()
     {
-        Attachments.AddRange(_goods.Select((_, idx) => new PreviewImage(idx + 1, null)));
+        Attachments.AddRange(_goods.Select((x, idx) => new PreviewImage(idx + 1, null)));
 
         int index = 1;
         foreach (var good in _goods)
@@ -242,8 +244,21 @@ public class PostingWindowViewModel : ChildViewModel
 
             if (PostPinterest)
             {
-                using Driver driver = await Driver.CreateAsync(FsManager, Settings);
-                //TODO: await driver.PostInPinterest();
+                DrawingController drawingController = new();
+                List<ImageWithArticle> images = new();
+                for (var index = 0; index < _goods.Length; index++)
+                {
+                    var good = _goods[index];
+                    var attach = Attachments.FirstOrDefault(x => x.Id == index + 1);
+                    if (attach is null) continue;
+
+                    images.Add(new ImageWithArticle(good.Article, attach.Image));
+                }
+
+                Bitmap bmp = drawingController.CreateCollage("WB", images);
+                string collagePath = FsManager.SaveBitmapInTempAndGetFullPath(bmp);
+                using PinterestDriver driver = await DriverBase.CreateAsync<PinterestDriver>(FsManager, Settings);
+                await driver.PostInPinterest(PostText, collagePath);
             }
         }
         catch (Exception ex)
@@ -360,10 +375,18 @@ public class PostingWindowViewModel : ChildViewModel
 
     public async void SaveAllPreview()
     {
-        foreach (var attach in Attachments)
+        try
         {
-            string path = await WinManager.SaveFileDialog(WindowManager.SaveFileFormats.PNG);
-            attach.Image.Save(path);
+            foreach (var attach in Attachments)
+            {
+                string? path = await WinManager.SaveFileDialog(WindowManager.SaveFileFormats.PNG);
+                if (path is null) continue;
+                attach.Image.Save(path);
+            }
+        }
+        catch (Exception ex)
+        {
+            await WinManager.ShowError(ex);
         }
     }
 }

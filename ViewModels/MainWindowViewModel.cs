@@ -9,9 +9,11 @@ using Avalonia.Controls.Notifications;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using DynamicData;
 using ReactiveUI;
 using Shavkat_grabber.Helpers;
 using Shavkat_grabber.Logic;
+using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Views;
 
@@ -132,6 +134,16 @@ public class MainWindowViewModel : ViewModelBase
 
         _fsManager = new();
         _winManager = new(mainWindow);
+
+#if DEBUG
+        GoodItem[] items =
+        [
+            new(DebugHelper.GetTestGood()) { IsChecked = true },
+            new(DebugHelper.GetTestGood()) { IsChecked = true },
+        ];
+        _items.AddRange(items);
+        CheckedCount += items.Length;
+#endif
     }
 
     private void LoadSettingsOrCreate()
@@ -160,7 +172,7 @@ public class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        using Driver driver = await Driver.CreateAsync(_fsManager, _settings);
+        using WbDriver driver = await DriverBase.CreateAsync<WbDriver>(_fsManager, _settings);
         driver.OnLogMessage += OnLogMessage;
         driver.OnScaningEnd += OnDriverOnOnScaningEnd;
         await foreach (var item in driver.StartGrab(keyWords, SelectedCount))

@@ -146,6 +146,8 @@
                     <NumericUpDown Value="{Binding SelectedCount, Mode=TwoWay}"
                                    Minimum="1"
                                    Maximum="5"
+                                   ParsingNumberStyle="Integer"
+                                   FormatString="0"
                                    Width="100"/>
                     </StackPanel>
                 </StackPanel>

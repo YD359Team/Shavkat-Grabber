@@ -6,7 +6,7 @@
         xmlns:m="using:Shavkat_grabber.Models"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Shavkat_grabber.Views.PostingWindow"
-        Title="PostingWindow"
+        Title="Постинг"
         WindowStartupLocation="CenterOwner"
         x:DataType="vm:PostingWindowViewModel">
 

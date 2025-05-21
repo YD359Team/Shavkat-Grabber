@@ -2,6 +2,9 @@
 
 namespace Shavkat_grabber.Models;
 
+/// <summary>
+/// Товар
+/// </summary>
 public class Good
 {
     public string Article { get; set; }
@@ -24,7 +27,7 @@ public class GoodItem : ReactiveObject
     private bool _isChecked;
     public bool IsChecked
     {
-        get => _isChecked; 
+        get => _isChecked;
         set => this.RaiseAndSetIfChanged(ref _isChecked, value);
     }
     public Good Good { get; set; }

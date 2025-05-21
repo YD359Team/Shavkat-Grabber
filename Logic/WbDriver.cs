@@ -10,49 +10,15 @@ using Avalonia.Input.Platform;
 using Avalonia.Media.Imaging;
 using Microsoft.Playwright;
 using Shavkat_grabber.Extensions;
+using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Models;
 
 namespace Shavkat_grabber.Logic;
 
-public delegate void LogMessageDelegate(LogMessage logMessage);
-
-public class Driver : IDisposable
+public class WbDriver : DriverBase
 {
-    private readonly IPlaywright _playwright;
-    private readonly IBrowser _browser;
-    private readonly IPage _page;
-    private readonly FileSystemManager _fsManager;
-
-    private bool _isClosed = false;
-
     public event LogMessageDelegate OnLogMessage;
     public event EventHandler OnScaningEnd;
-
-    private Driver(
-        IPlaywright playwright,
-        IBrowser browser,
-        IPage page,
-        FileSystemManager fsManager
-    )
-    {
-        _playwright = playwright;
-        _browser = browser;
-        _page = page;
-        _fsManager = fsManager;
-    }
-
-    public static async Task<Driver> CreateAsync(
-        FileSystemManager fsManager,
-        AppSettings appSettings
-    )
-    {
-        var playwright = await Playwright.CreateAsync();
-        var browser = await playwright.Chromium.LaunchAsync(
-            new() { Headless = false, ExecutablePath = appSettings.ChromePath }
-        );
-        var page = await browser.NewPageAsync();
-        return new Driver(playwright, browser, page, fsManager);
-    }
 
     public async IAsyncEnumerable<Good> StartGrab(string[] keyWords, int count)
     {
@@ -101,7 +67,7 @@ public class Driver : IDisposable
                 await card.HoverAsync();
                 var goodPage = await _browser.NewPageAsync();
 
-                var good = await TryGrabGood(goodPage, cards, url);
+                var good = await TryGrabGood(goodPage, url);
 
                 if (good is not null)
                 {
@@ -120,22 +86,7 @@ public class Driver : IDisposable
         OnScaningEnd?.Invoke(this, EventArgs.Empty);
     }
 
-    public async Task PostInPinterest(Bitmap[] attachments)
-    {
-        await _page.GotoAsync("https://ru.pinterest.com/");
-        await Task.Delay(1000);
-
-        await _page.GotoAsync("https://ru.pinterest.com/pin-creation-tool/");
-
-        Console.WriteLine("wait h1");
-        await _page.WaitForSelectorAsync("h1");
-    }
-
-    private async Task<Good?> TryGrabGood(
-        IPage goodPage,
-        IReadOnlyList<IElementHandle> cards,
-        string url
-    )
+    private async Task<Good?> TryGrabGood(IPage goodPage, string url)
     {
         try
         {
@@ -201,21 +152,5 @@ public class Driver : IDisposable
     {
         Console.WriteLine(logMessage.Message);
         OnLogMessage?.Invoke(logMessage);
-    }
-
-    public async Task CloseAsync()
-    {
-        await _page.CloseAsync();
-        await _browser.CloseAsync();
-        _playwright.Dispose();
-        _isClosed = true;
-    }
-
-    public void Dispose()
-    {
-        if (!_isClosed)
-        {
-            CloseAsync().Wait();
-        }
     }
 }
