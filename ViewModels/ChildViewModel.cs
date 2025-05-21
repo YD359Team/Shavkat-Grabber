@@ -3,13 +3,16 @@ using Shavkat_grabber.Models;
 
 namespace Shavkat_grabber.ViewModels;
 
-public class ChildViewModel : ViewModelBase
+/// <summary>
+/// Родительская VM для всех дочерних <see cref="Views.MainWindow"/> окон
+/// </summary>
+public abstract class ChildViewModel : ViewModelBase
 {
     protected FileSystemManager FsManager { get; }
     protected WindowManager WinManager { get; }
     protected AppSettings Settings { get; }
 
-    public ChildViewModel(
+    protected ChildViewModel(
         FileSystemManager fsManager,
         WindowManager winManager,
         AppSettings settings

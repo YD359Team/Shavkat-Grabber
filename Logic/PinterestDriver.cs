@@ -23,12 +23,22 @@ public class PinterestDriver : DriverBase
 
         string storageStatePath = "state.json";
 
+        // Проверяем существование файла
+        if (!File.Exists(collagePath))
+        {
+            throw new FileNotFoundException($"Collage file not found: {collagePath}");
+        }
+
         // Создаём контекст с реалистичными настройками
         var contextOptions = new BrowserNewContextOptions
         {
             UserAgent =
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
             ViewportSize = new() { Width = 1280, Height = 720 },
+            ExtraHTTPHeaders = new Dictionary<string, string>
+            {
+                { "Accept-Language", "en-US,en;q=0.9" },
+            },
         };
 
         if (File.Exists(storageStatePath))
@@ -39,6 +49,11 @@ public class PinterestDriver : DriverBase
 
         await using var context = await _browser.NewContextAsync(contextOptions);
         var page = await context.NewPageAsync();
+
+        // Добавляем отладку
+        page.PageError += (_, e) => Console.WriteLine($"Page error: {e}");
+        page.Console += (_, msg) => Console.WriteLine($"Console: {msg.Text}");
+        page.RequestFailed += (_, request) => Console.WriteLine($"Request failed: {request.Url}");
 
         // Проверяем авторизацию
         await page.GotoAsync("https://ru.pinterest.com/");
@@ -56,6 +71,14 @@ public class PinterestDriver : DriverBase
 
         Console.WriteLine("Navigating to pin creation tool");
         await page.GotoAsync("https://ru.pinterest.com/pin-creation-tool/");
+
+        // Проверяем, не перенаправлены ли на страницу логина
+        if (page.Url.Contains("login"))
+        {
+            Console.WriteLine("Redirected to login page, re-authorizing...");
+            await Authorize(page);
+            await page.GotoAsync("https://ru.pinterest.com/pin-creation-tool/");
+        }
 
         // Ожидаем элемент загрузки файла
         try
@@ -76,6 +99,9 @@ public class PinterestDriver : DriverBase
             }
             else
             {
+                await page.ScreenshotAsync(
+                    new() { Path = $"error_upload_{DateTime.Now.Ticks}.png" }
+                );
                 throw;
             }
         }
@@ -88,28 +114,83 @@ public class PinterestDriver : DriverBase
             var chooser = await chooserTask;
             await chooser.SetFilesAsync(collagePath);
             Console.WriteLine("File uploaded successfully");
+            await page.WaitForResponseAsync(
+                response => response.Url.Contains("upload"),
+                new() { Timeout = 15000 }
+            );
         }
         catch (Exception ex)
         {
             Console.WriteLine($"File upload failed: {ex.Message}");
+            await page.ScreenshotAsync(new() { Path = $"error_upload_{DateTime.Now.Ticks}.png" });
             throw;
         }
 
-        await Task.Delay(1500);
+        await Task.Delay(3000); // Увеличенная задержка для обработки файла
+
+        // Имитация человеческого поведения
+        await page.EvaluateAsync(
+            "() => { Object.defineProperty(navigator, 'webdriver', { get: () => undefined }); }"
+        );
+        await page.Mouse.MoveAsync(200, 200);
+        await page.EvaluateAsync("window.scrollTo(0, 200)");
 
         // Заполняем описание и публикуем
         try
         {
-            var div = await page.QuerySelectorAsync("#storyboard-description-field-container");
-            Console.WriteLine("div is not null = " + div is not null);
-            var subDiv = await div.QuerySelectorAsync("div[role='button']");
-            Console.WriteLine("subDiv is not null = " + subDiv is not null);
+            var descriptionField = await page.WaitForSelectorAsync(
+                "div[contenteditable='true']",
+                new() { State = WaitForSelectorState.Visible, Timeout = 15000 }
+            );
+            if (descriptionField != null)
+            {
+                Console.WriteLine("Found contenteditable field");
+                await descriptionField.ClickAsync();
+                await descriptionField.FocusAsync();
+                await descriptionField.FillAsync(text);
+            }
+            else
+            {
+                Console.WriteLine("Contenteditable field not found, trying textarea/input...");
+                await page.FillAsync("textarea, input[aria-label*='description']", text);
+            }
 
-            await subDiv.FocusAsync();
-            await subDiv.PressAsync(text);
-            //await page.FillAsync("#storyboard-description-field-container", text);
-            await Task.Delay(500);
-            await page.GetByText("Опубликовать").ClickAsync();
+            await Task.Delay(1000); // Дополнительная задержка перед кликом
+
+            // Ожидаем кнопку "Опубликовать" как ILocator
+            var publishButton = page.Locator("button:has-text('Опубликовать')").First;
+            await publishButton.WaitForAsync(
+                new() { State = WaitForSelectorState.Visible, Timeout = 15000 }
+            );
+            if (publishButton == null)
+            {
+                Console.WriteLine("Publish button not found");
+                await page.ScreenshotAsync(
+                    new() { Path = $"error_publish_button_{DateTime.Now.Ticks}.png" }
+                );
+                throw new Exception("Publish button not found");
+            }
+
+            // Проверяем, активна ли кнопка
+            var isEnabled = await publishButton.EvaluateAsync<bool>("el => !el.disabled");
+            if (!isEnabled)
+            {
+                Console.WriteLine(
+                    "Publish button is disabled, waiting for it to become enabled..."
+                );
+                await page.WaitForTimeoutAsync(3000);
+                isEnabled = await publishButton.EvaluateAsync<bool>("el => !el.disabled");
+                if (!isEnabled)
+                {
+                    await page.ScreenshotAsync(
+                        new() { Path = $"error_publish_button_disabled_{DateTime.Now.Ticks}.png" }
+                    );
+                    throw new Exception("Publish button is still disabled after waiting");
+                }
+            }
+
+            await ClickWithRetryAsync(publishButton);
+
             await page.WaitForResponseAsync(
                 response => response.Url.Contains("pin"),
                 new() { Timeout = 10000 }
@@ -119,7 +200,27 @@ public class PinterestDriver : DriverBase
         catch (Exception ex)
         {
             Console.WriteLine($"Post failed: {ex.Message}");
+            await page.ScreenshotAsync(new() { Path = $"error_post_{DateTime.Now.Ticks}.png" });
             throw;
+        }
+    }
+
+    private async Task ClickWithRetryAsync(ILocator locator, int maxAttempts = 3)
+    {
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await locator.ClickAsync(new() { Timeout = 5000 });
+                return;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Click attempt {attempt} failed: {ex.Message}");
+                if (attempt == maxAttempts)
+                    throw;
+                await Task.Delay(1000 * attempt);
+            }
         }
     }
 
@@ -146,6 +247,7 @@ public class PinterestDriver : DriverBase
         catch (TimeoutException)
         {
             Console.WriteLine("Authorization failed: Timeout or redirect issue");
+            await page.ScreenshotAsync(new() { Path = $"auth_error_{DateTime.Now.Ticks}.png" });
             throw;
         }
     }
