@@ -1,10 +1,13 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using Shavkat_grabber.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Message = Telegram.Bot.Types.Message;
 
 namespace Shavkat_grabber.Logic;
 
@@ -19,7 +22,7 @@ public class TelegramBotApi
         _client = new TelegramBotClient(token);
     }
 
-    public async Task Post(string postText, Bitmap[] attachments)
+    public async Task<Result<int>> Post(string postText, Bitmap[] attachments)
     {
         // Создаем список потоков для изображений
         var streams = new MemoryStream[attachments.Length];
@@ -50,7 +53,12 @@ public class TelegramBotApi
         try
         {
             // Отправляем группу медиа в Telegram-канал
-            await _client.SendMediaGroup(_chatId, media);
+            Message[] messages = await _client.SendMediaGroup(_chatId, media);
+            return Result.Success(messages.First().Id);
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail<int>(ex);
         }
         finally
         {
@@ -66,7 +74,7 @@ public class TelegramBotApi
     {
         try
         {
-            User me = _client.GetMe().Result;
+            User me = await _client.GetMe();
             return true;
         }
         catch

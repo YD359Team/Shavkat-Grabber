@@ -14,7 +14,7 @@ public class Result
 
 public class Result<T> : Result
 {
-    public T? Value { get; set; }
+    public T? Value { get; private set; }
 
     private Result(T? value, bool isSuccess, Exception? error)
     {

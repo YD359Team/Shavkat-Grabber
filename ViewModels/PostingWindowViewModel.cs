@@ -16,6 +16,7 @@ using Shavkat_grabber.Extensions;
 using Shavkat_grabber.Logic;
 using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Models;
+using Shavkat_grabber.Models.Json;
 using Shavkat_grabber.Views;
 
 namespace Shavkat_grabber.ViewModels;
@@ -120,11 +121,6 @@ public class PostingWindowViewModel : ChildViewModel
     {
         IsTgBotConnected = await _telegram.CheckConnection();
     }
-
-    // private async Task GigaChatApiTask()
-    // {
-    //     IsGigaChatApiConnected = await _gigaChatApi.CheckConnection();
-    // }
 
     private async Task<string> GetTextFromGoods()
     {
@@ -237,13 +233,20 @@ public class PostingWindowViewModel : ChildViewModel
         {
             IsAsyncDataLoaded = false;
 
+            int tgPostId = 0;
+
             if (PostTelegram)
             {
-                await _telegram.Post(PostText, Attachments.Select(x => x.Image).ToArray());
+                Result<int> result = await _telegram.Post(PostText, Attachments.Select(x => x.Image).ToArray());
+                tgPostId = result.Value;
             }
 
             if (PostPinterest)
             {
+                if (tgPostId < 1) throw new Exception("Требуется отправить Telegram пост перед Pinterest");
+
+                string tgPostUrl = $"https://t.me/{Settings.TgChannelId[1..]}/{tgPostId}";
+
                 DrawingController drawingController = new();
                 List<ImageWithArticle> images = new();
                 for (var index = 0; index < _goods.Length; index++)

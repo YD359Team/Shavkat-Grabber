@@ -11,10 +11,10 @@ public class Good
     public string Url { get; set; }
     public string Title { get; set; }
     public string Price { get; set; }
-    public string OldPrice { get; set; }
-    public string Vendor { get; set; }
+    public string? OldPrice { get; set; }
+    public string? Vendor { get; set; }
     public string ImageUrl { get; set; }
-    public string Rating { get; set; }
+    public string? Rating { get; set; }
 
     public override string ToString()
     {

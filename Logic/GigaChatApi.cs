@@ -11,6 +11,7 @@ using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Authenticators.OAuth2;
 using Shavkat_grabber.Models;
+using Shavkat_grabber.Models.Json;
 
 namespace Shavkat_grabber.Logic;
 

@@ -4,7 +4,9 @@ using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using Shavkat_grabber.Extensions;
+using Shavkat_grabber.Models;
 using Shavkat_grabber.Views;
+using Shavkat_grabber.Views.Dialogs;
 
 namespace Shavkat_grabber.Logic;
 
@@ -56,6 +58,13 @@ public class WindowManager
             return null;
 
         return file.Path.AbsolutePath;
+    }
+
+    public async Task<string> Question(string question, string[] answers)
+    {
+        QuestionWindow wnd = new QuestionWindow();
+        wnd.DataContext = new Question { QuestionText = question, Answers = answers };
+        return await wnd.ShowDialog<string>(_mainWindow);
     }
 
     public enum SaveFileFormats
