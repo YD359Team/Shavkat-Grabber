@@ -1,4 +1,7 @@
-﻿using Avalonia.Controls;
+﻿using System.IO;
+using Avalonia.Controls;
+using ReactiveUI;
+using Shavkat_grabber.Helpers;
 using Shavkat_grabber.Logic;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Views;
@@ -19,21 +22,26 @@ public class SettingsWindowViewMode : ChildViewModel
     )
         : base(fsManager, manager, currentSettings)
     {
+        UpdateVisibleSettings(currentSettings);
+    }
+
+    private void UpdateVisibleSettings(AppSettings fromSettings)
+    {
         AppSettings = new()
         {
-            ChromePath = currentSettings.ChromePath,
-            TgBotToken = currentSettings.TgBotToken,
-            TgChannelId = currentSettings.TgChannelId,
-            GigaChatScope = currentSettings.GigaChatScope,
-            GigaChatAuthKey = currentSettings.GigaChatAuthKey,
-            GigaChatPrompt = currentSettings.GigaChatPrompt,
-            StaticHeader = currentSettings.StaticHeader,
-            StaticFooter = currentSettings.StaticFooter,
-            RemoveBgCliPath = currentSettings.RemoveBgCliPath,
-            RemoveBgApiKey = currentSettings.RemoveBgApiKey,
-            RemoveBgColor = currentSettings.RemoveBgColor,
-            PinterestEmail = currentSettings.PinterestEmail,
-            PinterestPassword = currentSettings.PinterestPassword,
+            ChromePath = fromSettings.ChromePath,
+            TgBotToken = fromSettings.TgBotToken,
+            TgChannelId = fromSettings.TgChannelId,
+            GigaChatScope = fromSettings.GigaChatScope,
+            GigaChatAuthKey = fromSettings.GigaChatAuthKey,
+            GigaChatPrompt = fromSettings.GigaChatPrompt,
+            StaticHeader = fromSettings.StaticHeader,
+            StaticFooter = fromSettings.StaticFooter,
+            RemoveBgCliPath = fromSettings.RemoveBgCliPath,
+            RemoveBgApiKey = fromSettings.RemoveBgApiKey,
+            RemoveBgColor = fromSettings.RemoveBgColor,
+            PinterestEmail = fromSettings.PinterestEmail,
+            PinterestPassword = fromSettings.PinterestPassword,
         };
     }
 
@@ -60,5 +68,16 @@ public class SettingsWindowViewMode : ChildViewModel
     {
         Window wnd = (Window)eWnd;
         wnd.Close(null);
+    }
+
+    public async void LoadFromFile()
+    {
+        string? path = await WinManager.OpenFileDialog(WindowManager.FileFormats.Json);
+        if (path is null)
+            return;
+
+        AppSettings settings = SerializeHelper.Deserialize<AppSettings>(File.ReadAllText(path));
+        UpdateVisibleSettings(settings);
+        this.RaisePropertyChanged(nameof(AppSettings));
     }
 }

@@ -13,8 +13,8 @@ namespace Shavkat_grabber.Logic;
 
 public class TelegramBotApi
 {
-    private TelegramBotClient _client;
-    private string _chatId;
+    private readonly TelegramBotClient _client;
+    private readonly string _chatId;
 
     public TelegramBotApi(string token, string channelId)
     {

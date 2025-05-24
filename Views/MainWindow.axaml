@@ -5,7 +5,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:conv="using:Shavkat_grabber.Converters"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" 
+        d:DesignWidth="1300" d:DesignHeight="768"
+        Width="1300" Height="768"
         x:Class="Shavkat_grabber.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/PNG/SG_Logo_128.png"
@@ -135,25 +137,7 @@
         </Border>
         
         <Border DockPanel.Dock="Bottom">
-            <Grid RowDefinitions="*,*">
-
-                <StackPanel Grid.Row="0"
-                            Orientation="Horizontal"
-                            Spacing="5">
-                    <StackPanel Orientation="Vertical"
-                                HorizontalAlignment="Left">
-                    <TextBlock Text="Количество"/>
-                    <NumericUpDown Value="{Binding SelectedCount, Mode=TwoWay}"
-                                   Minimum="1"
-                                   Maximum="5"
-                                   ParsingNumberStyle="Integer"
-                                   FormatString="0"
-                                   Width="100"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <ListBox Grid.Row="1"
-                         Name="ListboxLog"
+                <ListBox Name="ListboxLog"
                          ItemsSource="{Binding LogMessages}"
                          Height="130"
                          Background="Black">
@@ -173,43 +157,59 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                
-            </Grid>
-
         </Border>
-        
+
+        <!-- количество -->
+        <Border DockPanel.Dock="Right" 
+                BorderBrush="Blue"
+                BorderThickness="2">
+            <StackPanel Orientation="Vertical"
+                        HorizontalAlignment="Left">
+                <TextBlock Text="Количество" />
+                <NumericUpDown Value="{Binding SelectedCount, Mode=TwoWay}"
+                               Minimum="1"
+                               Maximum="5"
+                               ParsingNumberStyle="Integer"
+                               FormatString="0"
+                               Width="100" />
+            </StackPanel>
+        </Border>
+
         <Border>
             <Grid ColumnDefinitions="220,*">
-                <Border Grid.Column="0">
-                <TreeView ItemsSource="{Binding Root}"
-                          ScrollViewer.VerticalScrollBarVisibility="Visible"
-                          ScrollViewer.AllowAutoHide="False">
-                    <TreeView.DataTemplates>
-                        <TreeDataTemplate DataType="m:TreeViewNodeGroup" ItemsSource="{Binding Children}">
-                            <TextBlock Text="{Binding Title}"/>
-                        </TreeDataTemplate>
-                        <TreeDataTemplate DataType="m:TreeViewNodeItem">
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox Content="{Binding Title}"
-                                          IsChecked="{Binding IsChecked}"
-                                          FontSize="11"/>
-                            </StackPanel>
-                        </TreeDataTemplate>
-                    </TreeView.DataTemplates>
-                </TreeView>
+                <Border Grid.Column="0"
+                        BorderBrush="Red"
+                        BorderThickness="2">
+                        <TreeView ItemsSource="{Binding Root}"
+                                  ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                  ScrollViewer.AllowAutoHide="False">
+                            <TreeView.DataTemplates>
+                                <TreeDataTemplate DataType="m:TreeViewNodeGroup" ItemsSource="{Binding Children}">
+                                    <TextBlock Text="{Binding Title}" />
+                                </TreeDataTemplate>
+                                <TreeDataTemplate DataType="m:TreeViewNodeItem">
+                                    <StackPanel Orientation="Horizontal">
+                                        <CheckBox Content="{Binding Title}"
+                                                  IsChecked="{Binding IsChecked}"
+                                                  FontSize="11" />
+                                    </StackPanel>
+                                </TreeDataTemplate>
+                            </TreeView.DataTemplates>
+                        </TreeView>
                 </Border>
-                
-                <ScrollViewer Grid.Column="1"
-                              AllowAutoHide="False"
-                              HorizontalScrollBarVisibility="Visible"
-                              VerticalScrollBarVisibility="Visible">
-                    <TreeDataGrid Source="{Binding Items}"/>
-                </ScrollViewer>
+
+                <Border Grid.Column="1"
+                        BorderBrush="Cyan"
+                        BorderThickness="2">
+                    <ScrollViewer AllowAutoHide="False"
+                                  HorizontalScrollBarVisibility="Visible"
+                                  VerticalScrollBarVisibility="Visible">
+                        <TreeDataGrid Source="{Binding ItemsSource}" />
+                    </ScrollViewer>
+                </Border>
             </Grid>
-            
+
         </Border>
-
-
     </DockPanel>
 
 </Window>

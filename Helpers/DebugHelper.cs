@@ -3,7 +3,6 @@ using Shavkat_grabber.Models;
 
 namespace Shavkat_grabber.Helpers;
 
-#if DEBUG
 public static class DebugHelper
 {
     private static int _counter = 0;
@@ -26,4 +25,3 @@ public static class DebugHelper
         };
     }
 }
-#endif

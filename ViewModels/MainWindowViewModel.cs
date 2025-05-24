@@ -74,7 +74,7 @@ public class MainWindowViewModel : ViewModelBase
         ];
 
     ObservableCollection<GoodItem> _items = new();
-    public FlatTreeDataGridSource<GoodItem> Items { get; }
+    public FlatTreeDataGridSource<GoodItem> ItemsSource { get; }
 
     private bool _isLoading;
     public bool IsLoading
@@ -105,7 +105,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         LoadSettingsOrCreate();
 
-        Items = new FlatTreeDataGridSource<GoodItem>(_items)
+        ItemsSource = new FlatTreeDataGridSource<GoodItem>(_items)
         {
             Columns =
             {
@@ -205,7 +205,7 @@ public class MainWindowViewModel : ViewModelBase
     public async void Export(object eFormat)
     {
         string formatStr = SerializeHelper.Serialize(eFormat);
-        var format = Enum.Parse<WindowManager.SaveFileFormats>(formatStr.ToUpperInvariant());
+        var format = Enum.Parse<WindowManager.FileFormats>(formatStr.ToUpperInvariant());
         string? path = await _winManager.SaveFileDialog(format);
 
         if (path is null)
@@ -216,10 +216,7 @@ public class MainWindowViewModel : ViewModelBase
         Exporter export = new();
         if (formatStr == "csv")
         {
-            await export.ToCsv(
-                _items.Where(x => x.IsChecked).Select(x => x.Good),
-                File.OpenWrite(path)
-            );
+            await export.ToCsv(_items.Where(x => x.IsChecked).Select(x => x.Good), path);
             ShowSuccess("Сохранено");
         }
         else if (formatStr == "xlsx")

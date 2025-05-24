@@ -3,13 +3,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using Shavkat_grabber.Helpers;
 
 namespace Shavkat_grabber.Logic;
 
 public class FileSystemManager
 {
-    private static readonly char[] Letters = "abcdefghjklmnopqrstuwxyz".ToCharArray();
-
     public void DirClearOrCreateIfNotExist(string path)
     {
         if (!Directory.Exists(path))
@@ -37,7 +36,7 @@ public class FileSystemManager
 
     public string SaveBitmapInTempAndGetFullPath(Bitmap bmp)
     {
-        char[] buff = Random.Shared.GetItems(Letters, 5);
+        char[] buff = RandomHelper.GetRandomLetters(5);
         string path = GetTempDirPathWithFile($"{buff}.png");
         bmp.Save(path);
         return path;

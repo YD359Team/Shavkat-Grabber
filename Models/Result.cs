@@ -2,10 +2,10 @@
 
 namespace Shavkat_grabber.Models;
 
-public class Result
+public abstract class Result
 {
-    public bool IsSuccess { get; set; }
-    public Exception? Error { get; set; }
+    public bool IsSuccess { get; protected set; }
+    public Exception? Error { get; protected set; }
 
     public static Result<T> Fail<T>(Exception error) => Result<T>.Fail(error);
 

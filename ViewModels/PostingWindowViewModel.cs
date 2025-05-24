@@ -382,7 +382,7 @@ public class PostingWindowViewModel : ChildViewModel
         {
             foreach (var attach in Attachments)
             {
-                string? path = await WinManager.SaveFileDialog(WindowManager.SaveFileFormats.PNG);
+                string? path = await WinManager.SaveFileDialog(WindowManager.FileFormats.Png);
                 if (path is null) continue;
                 attach.Image.Save(path);
             }

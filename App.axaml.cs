@@ -22,9 +22,13 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             MainWindow mainWindow = new MainWindow();
+#if DEBUG
+            mainWindow.Title =
+                $"{mainWindow.Title} - {version.Major}.{version.Minor}.{version.Build} [DEBUG MODE]";
+#else
             mainWindow.Title =
                 $"{mainWindow.Title} - {version.Major}.{version.Minor}.{version.Build}";
-
+#endif
             MainWindowViewModel vm = new MainWindowViewModel(mainWindow);
             desktop.MainWindow = mainWindow;
             mainWindow.DataContext = vm;

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform;
@@ -21,6 +23,7 @@ public class WindowManager
     private readonly FilePickerFileType[] fileTypesCsv = [new("CSV") { Patterns = ["*.csv"] }];
     private readonly FilePickerFileType[] fileTypesXlsx = [new("XLSX") { Patterns = ["*.xlsx"] }];
     private readonly FilePickerFileType[] fileTypesPng = [new("PNG") { Patterns = ["*.png"] }];
+    private readonly FilePickerFileType[] fileTypesJson = [new("JSON") { Patterns = ["*.json"] }];
 
     public WindowManager(MainWindow mainWindow)
     {
@@ -33,20 +36,24 @@ public class WindowManager
         await wnd.ShowDialog(_mainWindow);
     }
 
-    public async Task<string?> SaveFileDialog(SaveFileFormats format)
+    public async Task<string?> SaveFileDialog(FileFormats format)
     {
         var options = new FilePickerSaveOptions();
-        if (format == SaveFileFormats.CSV)
+        if (format == FileFormats.Csv)
         {
             options.FileTypeChoices = fileTypesCsv;
         }
-        else if (format == SaveFileFormats.XLSX)
+        else if (format == FileFormats.Xlsx)
         {
             options.FileTypeChoices = fileTypesXlsx;
         }
-        else if (format == SaveFileFormats.PNG)
+        else if (format == FileFormats.Png)
         {
             options.FileTypeChoices = fileTypesPng;
+        }
+        else if (format == FileFormats.Json)
+        {
+            options.FileTypeChoices = fileTypesJson;
         }
         else
         {
@@ -57,20 +64,52 @@ public class WindowManager
         if (file is null)
             return null;
 
-        return file.Path.AbsolutePath;
+        return WebUtility.UrlDecode(file.Path.AbsolutePath);
+    }
+
+    public async Task<string?> OpenFileDialog(FileFormats format)
+    {
+        var options = new FilePickerOpenOptions();
+        if (format == FileFormats.Csv)
+        {
+            options.FileTypeFilter = fileTypesCsv;
+        }
+        else if (format == FileFormats.Xlsx)
+        {
+            options.FileTypeFilter = fileTypesXlsx;
+        }
+        else if (format == FileFormats.Png)
+        {
+            options.FileTypeFilter = fileTypesPng;
+        }
+        else if (format == FileFormats.Json)
+        {
+            options.FileTypeFilter = fileTypesJson;
+        }
+        else
+        {
+            throw new NotImplementedException();
+        }
+
+        var files = await TopLevel.StorageProvider.OpenFilePickerAsync(options);
+        if (files is null || files.Count < 1)
+            return null;
+
+        return WebUtility.UrlDecode(files.First().Path.AbsolutePath);
     }
 
     public async Task<string> Question(string question, string[] answers)
     {
         QuestionWindow wnd = new QuestionWindow();
-        wnd.DataContext = new Question { QuestionText = question, Answers = answers };
+        wnd.DataContext = new Question(question, answers);
         return await wnd.ShowDialog<string>(_mainWindow);
     }
 
-    public enum SaveFileFormats
+    public enum FileFormats
     {
-        CSV,
-        XLSX,
-        PNG,
+        Csv,
+        Xlsx,
+        Png,
+        Json,
     }
 }

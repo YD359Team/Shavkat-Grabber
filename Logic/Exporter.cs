@@ -10,12 +10,21 @@ namespace Shavkat_grabber.Logic;
 
 public class Exporter
 {
-    public async Task ToCsv(IEnumerable<Good> goods, Stream stream)
+    public async Task ToCsv(IEnumerable<Good> goods, string filePath)
     {
-        await using StreamWriter sw = new StreamWriter(stream);
+        await using StreamWriter sw = new StreamWriter(filePath);
         foreach (var item in goods)
         {
-            string[] a = [item.Article, item.Title, item.Price, item.OldPrice, item.Vendor, item.Url, item.ImageUrl];
+            string[] a =
+            [
+                item.Article,
+                item.Title,
+                item.Price,
+                item.OldPrice,
+                item.Vendor,
+                item.Url,
+                item.ImageUrl,
+            ];
             string ch = string.Join(";;", a);
             await sw.WriteLineAsync(ch);
         }
