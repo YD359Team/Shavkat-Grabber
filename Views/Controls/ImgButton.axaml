@@ -1,0 +1,32 @@
+﻿<Button
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d"
+    x:Class="Shavkat_grabber.Views.Controls.ImgButton"
+    x:DataType="ctrl:ImgButton"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:ctrl="using:Shavkat_grabber.Views.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Button.Template>
+        <ControlTemplate TargetType="Button">
+            <Border
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                Padding="{TemplateBinding Padding}"
+                Width="{TemplateBinding Width}">
+                <StackPanel Orientation="Horizontal" Spacing="5">
+                    <Image
+                        Height="{Binding ImgWidth, RelativeSource={RelativeSource AncestorType={x:Type ctrl:ImgButton}}}"
+                        Source="{Binding ImgSource, RelativeSource={RelativeSource AncestorType={x:Type ctrl:ImgButton}}}"
+                        VerticalAlignment="Center"
+                        Width="{Binding ImgWidth, RelativeSource={RelativeSource AncestorType={x:Type ctrl:ImgButton}}}" />
+                    <ContentPresenter Content="{Binding Content, RelativeSource={RelativeSource AncestorType={x:Type ctrl:ImgButton}}}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Border>
+        </ControlTemplate>
+    </Button.Template>
+</Button>

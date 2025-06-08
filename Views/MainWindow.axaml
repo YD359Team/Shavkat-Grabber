@@ -1,35 +1,39 @@
-<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:m="using:Shavkat_grabber.Models"
-        xmlns:vm="using:Shavkat_grabber.ViewModels"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:conv="using:Shavkat_grabber.Converters"
-        mc:Ignorable="d" 
-        d:DesignWidth="1300" d:DesignHeight="768"
-        Width="1300" Height="768"
-        x:Class="Shavkat_grabber.Views.MainWindow"
-        x:DataType="vm:MainWindowViewModel"
-        Icon="/Assets/PNG/SG_Logo_128.png"
-        Title="Shavkat Grabber"
-        WindowStartupLocation="CenterScreen">
+<Window
+    Height="768"
+    Icon="/Assets/PNG/SG_Logo_128.png"
+    Title="Shavkat Grabber"
+    Width="1300"
+    WindowStartupLocation="CenterScreen"
+    d:DesignHeight="768"
+    d:DesignWidth="1300"
+    mc:Ignorable="d"
+    x:Class="Shavkat_grabber.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:Shavkat_grabber.Views.Controls"
+    xmlns:conv="using:Shavkat_grabber.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:m="using:Shavkat_grabber.Models"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Shavkat_grabber.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Design.DataContext>
-        <vm:MainWindowViewModel/>
+        <vm:MainWindowViewModel />
     </Design.DataContext>
-    
+
     <Window.Resources>
-        <conv:MessageTypeToBrushConverter x:Key="messageTypeToBrushConverter"/>
+        <conv:MessageTypeToBrushConverter x:Key="messageTypeToBrushConverter" />
     </Window.Resources>
-    
+
     <Window.Styles>
-        <Style Selector="DockPanel > Border">
-            <Setter Property="Padding" Value="4 2"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="Gray"/>
+        <Style Selector="DockPanel &gt; Border">
+            <Setter Property="Padding" Value="4 2" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="Gray" />
         </Style>
         <Style Selector="TreeViewItem">
-            <Setter Property="IsExpanded" Value="{Binding (m:TreeViewNodeGroup).IsExpanded}"/>
+            <Setter Property="IsExpanded" Value="{Binding (m:TreeViewNodeGroup).IsExpanded}" />
         </Style>
     </Window.Styles>
 
@@ -37,173 +41,183 @@
         <Border DockPanel.Dock="Top">
 
             <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Grid.Column="0" 
-                            Orientation="Horizontal"
-                            Spacing="5">
+                <StackPanel
+                    Grid.Column="0"
+                    Orientation="Horizontal"
+                    Spacing="5">
 
-                <Button Command="{Binding Start}"
-                        IsEnabled="{Binding !IsLoading}"
-                        FontSize="16"
-                        HorizontalContentAlignment="Center"
+                    <controls:ImgButton
                         BorderBrush="#32BEA6"
-                        BorderThickness="1">
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="4">
-                        <Image Source="../Assets/PNG/start-64.png"
-                               Width="25"/>
-                        <TextBlock Text="Запуск"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
-
-                <Button Command="{Binding CreatePost}"
+                        Command="{Binding Start}"
+                        Content="Запуск"
                         FontSize="16"
                         HorizontalContentAlignment="Center"
+                        ImgSource="../Assets/PNG/start-64.png"
+                        ImgWidth="25"
+                        IsEnabled="{Binding !IsLoading}" />
+
+                    <controls:ImgButton
                         BorderBrush="#29B6F6"
-                        BorderThickness="1">
-                    <Button.IsEnabled>
-                        <MultiBinding Converter="{x:Static BoolConverters.And}">
-                            <Binding Path="!IsLoading"/>
-                            <Binding Path="!!CheckedCount"/>
-                        </MultiBinding>
-                    </Button.IsEnabled>
-                    <StackPanel Orientation="Horizontal"
-                                Spacing="4">
-                        <Image Source="../Assets/PNG/telegram-48.png"
-                               Width="25"/>
-                        <TextBlock Text="Создать пост"
-                                   VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+                        Command="{Binding CreatePost}"
+                        Content="Создать пост"
+                        FontSize="16"
+                        HorizontalContentAlignment="Center"
+                        ImgSource="../Assets/PNG/telegram-48.png"
+                        ImgWidth="25">
+                        <Button.IsEnabled>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                <Binding Path="!IsLoading" />
+                                <Binding Path="!!CheckedCount" />
+                            </MultiBinding>
+                        </Button.IsEnabled>
+                    </controls:ImgButton>
 
-                <SplitButton Content="Экспорт в XLSX"
-                             Command="{Binding Export}"
-                             CommandParameter="xlsx"
-                             FontSize="16">
-                    <Button.IsEnabled>
-                        <MultiBinding Converter="{x:Static BoolConverters.And}">
-                            <Binding Path="!IsLoading"/>
-                            <Binding Path="!!CheckedCount"/>
-                        </MultiBinding>
-                    </Button.IsEnabled>
-                    <SplitButton.Flyout>
-                        <MenuFlyout>
-                            <MenuItem Header="Экспорт в CSV"
-                                      Command="{Binding Export}"
-                                      CommandParameter="csv"/>
-                        </MenuFlyout>
-                    </SplitButton.Flyout>
-                </SplitButton>
-            </StackPanel>
-
-                <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
-                            Spacing="5">
-                    <Button Command="{Binding ShowHelp}"
-                            IsEnabled="{Binding !IsLoading}"
-                            FontSize="16"
-                            HorizontalContentAlignment="Center"
-                            BorderBrush="Chocolate"
-                            BorderThickness="1">
-                        <StackPanel Orientation="Horizontal"
-                                    Spacing="4">
-                            <Image Source="../Assets/PNG/help-64.png"
-                                   Width="25"/>
-                            <TextBlock Text="Помощь"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-
-                    <Button Command="{Binding ShowSettings}"
-                            IsEnabled="{Binding !IsLoading}"
-                            FontSize="16"
-                            HorizontalContentAlignment="Center"
-                            BorderBrush="#455A64"
-                            BorderThickness="1">
-                        <StackPanel Orientation="Horizontal"
-                                    Spacing="4">
-                            <Image Source="../Assets/PNG/settings-48.png"
-                                   Width="25"/>
-                            <TextBlock Text="Настройки"
-                                       VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
+                    <SplitButton
+                        Command="{Binding Export}"
+                        CommandParameter="xlsx"
+                        Content="Экспорт в XLSX"
+                        FontSize="16">
+                        <Button.IsEnabled>
+                            <MultiBinding Converter="{x:Static BoolConverters.And}">
+                                <Binding Path="!IsLoading" />
+                                <Binding Path="!!CheckedCount" />
+                            </MultiBinding>
+                        </Button.IsEnabled>
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuItem
+                                    Command="{Binding Export}"
+                                    CommandParameter="csv"
+                                    Header="Экспорт в CSV" />
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
                 </StackPanel>
-               
+
+                <StackPanel
+                    Grid.Column="1"
+                    Orientation="Horizontal"
+                    Spacing="5">
+
+                    <controls:ImgButton
+                        BorderBrush="Chocolate"
+                        Command="{Binding ShowHelp}"
+                        Content="Помощь"
+                        FontSize="16"
+                        HorizontalContentAlignment="Center"
+                        ImgSource="../Assets/PNG/help-64.png"
+                        ImgWidth="25"
+                        IsEnabled="{Binding !IsLoading}" />
+
+                    <controls:ImgButton
+                        BorderBrush="#455A64"
+                        Command="{Binding ShowSettings}"
+                        Content="Настройки"
+                        FontSize="16"
+                        HorizontalContentAlignment="Center"
+                        ImgSource="../Assets/PNG/settings-48.png"
+                        ImgWidth="25"
+                        IsEnabled="{Binding !IsLoading}" />
+
+                </StackPanel>
+
 
             </Grid>
-            
+
 
         </Border>
-        
+
+        <!--  Нижняя панель  -->
         <Border DockPanel.Dock="Bottom">
-                <ListBox Name="ListboxLog"
-                         ItemsSource="{Binding LogMessages}"
-                         Height="130"
-                         Background="Black">
+            <Grid ColumnDefinitions="Auto,*">
+                <Border Grid.Column="0" Padding="4,2">
+                    <StackPanel Orientation="Vertical" Spacing="3">
+                        <controls:ImgButton
+                            Command="{Binding ConsoleClear}"
+                            Content="Очистить"
+                            ImgSource="../Assets/PNG/trash-32.png"
+                            ImgWidth="32" />
+                    </StackPanel>
+                </Border>
+                <ListBox
+                    Background="Black"
+                    Grid.Column="1"
+                    Height="130"
+                    ItemsSource="{Binding LogMessages}"
+                    Name="ListboxLog">
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
-                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Padding" Value="0" />
                         </Style>
                     </ListBox.Styles>
                     <ListBox.ItemTemplate>
                         <DataTemplate DataType="m:LogMessage">
-                            <TextBlock FontFamily="monospaced" 
-                                       Foreground="{Binding MessageType, Converter={StaticResource messageTypeToBrushConverter}}">
-                                <Run Text="{Binding CreateTime}"/>
-                                <Run Text="{Binding MessageType}"/>
-                                <Run Text="{Binding Message}"/>
+                            <TextBlock FontFamily="monospaced" Foreground="{Binding MessageType, Converter={StaticResource messageTypeToBrushConverter}}">
+                                <Run Text="{Binding CreateTime}" />
+                                <Run Text="{Binding MessageType}" />
+                                <Run Text="{Binding Message}" />
                             </TextBlock>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+            </Grid>
         </Border>
 
-        <!-- количество -->
-        <Border DockPanel.Dock="Right" 
-                BorderBrush="Blue"
-                BorderThickness="2">
-            <StackPanel Orientation="Vertical"
-                        HorizontalAlignment="Left">
+
+        <!--  Правая панель  -->
+        <Border DockPanel.Dock="Right" Width="200">
+            <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
+                <TextBlock Text="Маркетплейсы" />
+                <!--  маркетплейсы  -->
+                <StackPanel Orientation="Horizontal" Spacing="3">
+                    <Image Source="../Assets/PNG/wb-64.png" Width="42" />
+                    <TextBlock Text="WildBerries" VerticalAlignment="Center" />
+                    <ToggleSwitch IsChecked="True" IsEnabled="False" />
+                </StackPanel>
+                <!--  количество  -->
                 <TextBlock Text="Количество" />
-                <NumericUpDown Value="{Binding SelectedCount, Mode=TwoWay}"
-                               Minimum="1"
-                               Maximum="5"
-                               ParsingNumberStyle="Integer"
-                               FormatString="0"
-                               Width="100" />
+                <NumericUpDown
+                    FormatString="0"
+                    HorizontalAlignment="Left"
+                    Maximum="5"
+                    Minimum="1"
+                    ParsingNumberStyle="Integer"
+                    Value="{Binding SelectedCount, Mode=TwoWay}"
+                    Width="100" />
             </StackPanel>
         </Border>
 
+        <!--  Центральная панель  -->
         <Border>
             <Grid ColumnDefinitions="220,*">
-                <Border Grid.Column="0"
-                        BorderBrush="Red"
-                        BorderThickness="2">
-                        <TreeView ItemsSource="{Binding Root}"
-                                  ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                  ScrollViewer.AllowAutoHide="False">
-                            <TreeView.DataTemplates>
-                                <TreeDataTemplate DataType="m:TreeViewNodeGroup" ItemsSource="{Binding Children}">
-                                    <TextBlock Text="{Binding Title}" />
-                                </TreeDataTemplate>
-                                <TreeDataTemplate DataType="m:TreeViewNodeItem">
-                                    <StackPanel Orientation="Horizontal">
-                                        <CheckBox Content="{Binding Title}"
-                                                  IsChecked="{Binding IsChecked}"
-                                                  FontSize="11" />
-                                    </StackPanel>
-                                </TreeDataTemplate>
-                            </TreeView.DataTemplates>
-                        </TreeView>
+                <!--  Категории  -->
+                <Border Grid.Column="0">
+                    <TreeView
+                        ItemsSource="{Binding Root}"
+                        ScrollViewer.AllowAutoHide="False"
+                        ScrollViewer.VerticalScrollBarVisibility="Visible">
+                        <TreeView.DataTemplates>
+                            <TreeDataTemplate DataType="m:TreeViewNodeGroup" ItemsSource="{Binding Children}">
+                                <TextBlock Text="{Binding Title}" />
+                            </TreeDataTemplate>
+                            <TreeDataTemplate DataType="m:TreeViewNodeItem">
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox
+                                        Content="{Binding Title}"
+                                        FontSize="11"
+                                        IsChecked="{Binding IsChecked}" />
+                                </StackPanel>
+                            </TreeDataTemplate>
+                        </TreeView.DataTemplates>
+                    </TreeView>
                 </Border>
 
-                <Border Grid.Column="1"
-                        BorderBrush="Cyan"
-                        BorderThickness="2">
-                    <ScrollViewer AllowAutoHide="False"
-                                  HorizontalScrollBarVisibility="Visible"
-                                  VerticalScrollBarVisibility="Visible">
+                <!--  Результаты парсинга  -->
+                <Border Grid.Column="1">
+                    <ScrollViewer
+                        AllowAutoHide="False"
+                        HorizontalScrollBarVisibility="Visible"
+                        VerticalScrollBarVisibility="Visible">
                         <TreeDataGrid Source="{Binding ItemsSource}" />
                     </ScrollViewer>
                 </Border>

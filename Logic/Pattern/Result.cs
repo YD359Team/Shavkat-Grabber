@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shavkat_grabber.Models;
+namespace Shavkat_grabber.Pattern;
 
 public abstract class Result
 {

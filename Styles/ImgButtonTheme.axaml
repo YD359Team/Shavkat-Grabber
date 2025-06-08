@@ -1,0 +1,44 @@
+﻿<Styles
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:Shavkat_grabber.Views.Controls"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <controls:ImgButton
+            Content="Удалить"
+            ImgSource="../Assets/PNG/trash-32.png"
+            ImgWidth="32" />
+    </Design.PreviewWith>
+    <Style Selector="controls|ImgButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    Padding="6,3">
+                    <StackPanel Orientation="Horizontal" Spacing="5">
+                        <Image
+                            Source="{TemplateBinding ImgSource}"
+                            VerticalAlignment="Center"
+                            Width="{TemplateBinding ImgWidth}" />
+                        <TextBlock Text="{TemplateBinding Content}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="controls|ImgButton:focus">
+        <Setter Property="BorderBrush" Value="LightSkyBlue" />
+    </Style>
+    <Style Selector="controls|ImgButton:pointerover">
+        <Setter Property="Background" Value="LightGray" />
+    </Style>
+    <Style Selector="controls|ImgButton:pressed">
+        <Setter Property="Background" Value="Gray" />
+    </Style>
+    <Style Selector="controls|ImgButton:disabled">
+        <Setter Property="Background" Value="DimGray" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+</Styles>

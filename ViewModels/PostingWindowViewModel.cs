@@ -17,6 +17,7 @@ using Shavkat_grabber.Logic;
 using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Models.Json;
+using Shavkat_grabber.Pattern;
 using Shavkat_grabber.Views;
 
 namespace Shavkat_grabber.ViewModels;
@@ -28,60 +29,52 @@ public class PostingWindowViewModel : ChildViewModel
 
     private Good[] _goods;
 
-    private bool _isAsyncDataLoaded;
     public bool IsAsyncDataLoaded
     {
-        get => _isAsyncDataLoaded;
-        set => this.RaiseAndSetIfChanged(ref _isAsyncDataLoaded, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private bool _isGigaChatApiConnected;
     public bool IsGigaChatApiConnected
     {
-        get => _isGigaChatApiConnected;
-        set => this.RaiseAndSetIfChanged(ref _isGigaChatApiConnected, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private bool _isTgBotConnected;
     public bool IsTgBotConnected
     {
-        get => _isTgBotConnected;
-        set => this.RaiseAndSetIfChanged(ref _isTgBotConnected, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private int _imageLoaded;
     public int ImageLoaded
     {
-        get => _imageLoaded;
-        set => this.RaiseAndSetIfChanged(ref _imageLoaded, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private string _postText;
     public string PostText
     {
-        get => _postText;
-        set => this.RaiseAndSetIfChanged(ref this._postText, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private bool _postTelegram = false;
     public bool PostTelegram
     {
-        get => _postTelegram;
-        set => this.RaiseAndSetIfChanged(ref _postTelegram, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private bool _postPinterest = true;
     public bool PostPinterest
     {
-        get => _postPinterest;
-        set => this.RaiseAndSetIfChanged(ref _postPinterest, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    private bool _postTiktok = false;
     public bool PostTiktok
     {
-        get => _postTiktok;
-        set => this.RaiseAndSetIfChanged(ref _postTiktok, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     public ObservableCollection<PreviewImage> Attachments { get; } = new();
@@ -243,7 +236,7 @@ public class PostingWindowViewModel : ChildViewModel
 
             if (PostPinterest)
             {
-                if (tgPostId < 1) throw new Exception("Требуется отправить Telegram пост перед Pinterest");
+                //if (tgPostId < 1) throw new Exception("Требуется отправить Telegram пост перед Pinterest");
 
                 string tgPostUrl = $"https://t.me/{Settings.TgChannelId[1..]}/{tgPostId}";
 
@@ -356,7 +349,7 @@ public class PostingWindowViewModel : ChildViewModel
 
     public void MorphText(int from, int to, string separator)
     {
-        string selectedText = _postText;
+        string selectedText = PostText;
         string s1 = selectedText.Insert(from, separator);
         string s2 = s1.Insert(to + 1, separator);
         Console.WriteLine($"before: {selectedText}");
@@ -367,7 +360,7 @@ public class PostingWindowViewModel : ChildViewModel
 
     public void MorphText(int from, int to, string lSeparator, string rSeparator)
     {
-        string selectedText = _postText;
+        string selectedText = PostText;
         string s1 = selectedText.Insert(from, lSeparator);
         string s2 = s1.Insert(to + 1, rSeparator);
         Console.WriteLine($"before: {selectedText}");

@@ -59,7 +59,7 @@ public class AppSettings : ReactiveObject
     public static AppSettings CreateDefault()
     {
         string sysPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-        return new AppSettings
+        return new()
         {
             ChromePath = Path.Combine(sysPath, @"Google\Chrome\Application\chrome.exe"),
             GigaChatPrompt = "Составь мне короткое описание для поста из следующих товаров:",

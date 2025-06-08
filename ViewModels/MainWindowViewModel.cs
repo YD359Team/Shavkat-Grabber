@@ -274,4 +274,9 @@ public class MainWindowViewModel : ViewModelBase
     {
         _winManager.MainWindow.ShowNotification("Ошибка", msg, NotificationType.Error);
     }
+
+    public void ConsoleClear()
+    {
+        LogMessages.Clear();
+    }
 }

@@ -12,6 +12,7 @@ using RestSharp;
 using RestSharp.Authenticators.OAuth2;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Models.Json;
+using Shavkat_grabber.Pattern;
 
 namespace Shavkat_grabber.Logic;
 

@@ -1,10 +1,13 @@
-<Application xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Shavkat_grabber.App"
-             RequestedThemeVariant="Light">
-  
+<Application
+    RequestedThemeVariant="Light"
+    x:Class="Shavkat_grabber.App"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml"/>
+        <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
+        <StyleInclude Source="Styles/ImgButtonTheme.axaml" />
+        <StyleInclude Source="Styles/Common.axaml" />
     </Application.Styles>
 </Application>
