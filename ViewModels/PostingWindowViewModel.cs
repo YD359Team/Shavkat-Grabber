@@ -53,6 +53,12 @@ public class PostingWindowViewModel : ChildViewModel
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
+    public Bitmap Collage
+    {
+        get => field; 
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
     public string PostText
     {
         get => field;
@@ -105,9 +111,34 @@ public class PostingWindowViewModel : ChildViewModel
 
         Attachments.Sort();
 
+        while (ImageLoaded < _goods.Length)
+        {
+            await Task.Delay(200);
+        }
+
+        // коллаж
+        CreateCollage();
+
+        // текст
         PostText = await GetTextFromGoods();
 
         IsAsyncDataLoaded = true;
+    }
+
+    private void CreateCollage()
+    {
+        DrawingController drawingController = new();
+        List<ImageWithArticle> images = new();
+        for (var index = 0; index < _goods.Length; index++)
+        {
+            var good = _goods[index];
+            var attach = Attachments.FirstOrDefault(x => x.Id == index + 1);
+            if (attach is null) continue;
+
+            images.Add(new ImageWithArticle(good.Article, attach.Image));
+        }
+
+        Collage = drawingController.CreateCollage("WB", images);
     }
 
     private async Task TgBotTask()
@@ -240,19 +271,8 @@ public class PostingWindowViewModel : ChildViewModel
 
                 string tgPostUrl = $"https://t.me/{Settings.TgChannelId[1..]}/{tgPostId}";
 
-                DrawingController drawingController = new();
-                List<ImageWithArticle> images = new();
-                for (var index = 0; index < _goods.Length; index++)
-                {
-                    var good = _goods[index];
-                    var attach = Attachments.FirstOrDefault(x => x.Id == index + 1);
-                    if (attach is null) continue;
 
-                    images.Add(new ImageWithArticle(good.Article, attach.Image));
-                }
-
-                Bitmap bmp = drawingController.CreateCollage("WB", images);
-                string collagePath = FsManager.SaveBitmapInTempAndGetFullPath(bmp);
+                string collagePath = FsManager.SaveBitmapInTempAndGetFullPath(Collage);
                 using PinterestDriver driver = await DriverBase.CreateAsync<PinterestDriver>(FsManager, Settings);
                 await driver.PostInPinterest(PostText, collagePath);
             }
@@ -305,6 +325,7 @@ public class PostingWindowViewModel : ChildViewModel
 
             prev.Image = new Bitmap(targetPath);
             prev.RaisePropertyChanged(nameof(prev.Image));
+            CreateCollage();
         }
         catch (Exception ex)
         {
