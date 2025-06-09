@@ -38,7 +38,7 @@
     </Window.Styles>
 
     <DockPanel>
-        <Border DockPanel.Dock="Top">
+        <Border DockPanel.Dock="Top" Padding="4,2">
 
             <Grid ColumnDefinitions="*,Auto">
                 <StackPanel
@@ -92,6 +92,16 @@
                             </MenuFlyout>
                         </SplitButton.Flyout>
                     </SplitButton>
+
+                    <controls:ImgButton
+                        BorderBrush="CornflowerBlue"
+                        Command="{Binding CreatePost}"
+                        Content="База данных"
+                        FontSize="16"
+                        HorizontalContentAlignment="Center"
+                        ImgSource="../Assets/PNG/storage-48.png"
+                        ImgWidth="25"
+                        IsEnabled="{Binding !IsLoading}" />
                 </StackPanel>
 
                 <StackPanel
@@ -128,7 +138,7 @@
         </Border>
 
         <!--  Нижняя панель  -->
-        <Border DockPanel.Dock="Bottom">
+        <Border DockPanel.Dock="Bottom" Padding="4,2">
             <Grid ColumnDefinitions="Auto,*">
                 <Border Grid.Column="0" Padding="4,2">
                     <StackPanel Orientation="Vertical" Spacing="3">
@@ -165,7 +175,10 @@
 
 
         <!--  Правая панель  -->
-        <Border DockPanel.Dock="Right" Width="200">
+        <Border
+            DockPanel.Dock="Right"
+            Padding="4,2"
+            Width="200">
             <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
                 <TextBlock Text="Маркетплейсы" />
                 <!--  маркетплейсы  -->
@@ -188,7 +201,7 @@
         </Border>
 
         <!--  Центральная панель  -->
-        <Border>
+        <Border Padding="4,2">
             <Grid ColumnDefinitions="220,*">
                 <!--  Категории  -->
                 <Border Grid.Column="0">

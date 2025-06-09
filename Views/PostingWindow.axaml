@@ -36,6 +36,7 @@
         </Style>
     </Window.Styles>
 
+    <!--  Верхняя панель  -->
     <Border Padding="4,2">
         <DockPanel>
             <Border DockPanel.Dock="Top">
@@ -90,9 +91,9 @@
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-
             </Border>
-            <Border DockPanel.Dock="Bottom" Padding="2">
+            <!--  Нижняя панель  -->
+            <Border DockPanel.Dock="Bottom" Padding="4,2">
                 <controls:ImgButton
                     BorderBrush="#29B6F6"
                     Command="{Binding Post}"
@@ -103,120 +104,156 @@
                     ImgWidth="25"
                     IsEnabled="{Binding IsAsyncDataLoaded}" />
             </Border>
-            <Grid RowDefinitions="Auto,*,Auto">
-                <Border
-                    BorderBrush="Black"
-                    BorderThickness="0.75"
-                    Grid.Row="0">
-                    <StackPanel Orientation="Horizontal">
-                        <Button
-                            Content="B"
-                            FontWeight="Bold"
-                            IsEnabled="{Binding IsAsyncDataLoaded}"
-                            Name="btnBold" />
-                        <Button
-                            Content="i"
-                            FontStyle="Italic"
-                            IsEnabled="{Binding IsAsyncDataLoaded}"
-                            Name="btnItalic" />
-                        <Button
-                            Content="a"
-                            IsEnabled="{Binding IsAsyncDataLoaded}"
-                            Name="btnLink" />
-                    </StackPanel>
-                </Border>
+            <ScrollViewer>
+                <Grid RowDefinitions="Auto,Auto">
+                    <Grid Grid.Row="0">
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="*,*">
+                            <Border
+                                BorderBrush="Black"
+                                BorderThickness="0.75"
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                Padding="4,2">
+                                <StackPanel Orientation="Horizontal" Spacing="3">
+                                    <StackPanel Orientation="Horizontal" Spacing="2">
+                                        <TextBlock Text="Markdown v2" VerticalAlignment="Center" />
+                                        <TextBlock
+                                            FontWeight="Bold"
+                                            Text="[?]"
+                                            ToolTip.Tip="Текст с поддержкой форматирования для Telegram"
+                                            VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Button
+                                        Content="B"
+                                        FontWeight="Bold"
+                                        IsEnabled="{Binding IsAsyncDataLoaded}"
+                                        Name="btnBold" />
+                                    <Button
+                                        Content="i"
+                                        FontStyle="Italic"
+                                        IsEnabled="{Binding IsAsyncDataLoaded}"
+                                        Name="btnItalic" />
+                                    <Button
+                                        Content="a"
+                                        IsEnabled="{Binding IsAsyncDataLoaded}"
+                                        Name="btnLink" />
+                                </StackPanel>
+                            </Border>
+                            <TextBox
+                                AcceptsReturn="True"
+                                ClearSelectionOnLostFocus="False"
+                                FontFamily="monospaced"
+                                FontSize="16"
+                                Grid.Column="0"
+                                Grid.Row="1"
+                                IsReadOnly="{Binding !IsAsyncDataLoaded}"
+                                IsUndoEnabled="True"
+                                Name="tbPostTg"
+                                Text="{Binding PostTextTg, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                            <Border
+                                BorderBrush="Black"
+                                BorderThickness="0.75"
+                                Grid.Column="1"
+                                Grid.Row="0"
+                                Padding="4,2">
+                                <TextBlock Text="Обычный текст" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBox
+                                AcceptsReturn="True"
+                                ClearSelectionOnLostFocus="False"
+                                FontFamily="monospaced"
+                                FontSize="16"
+                                Grid.Column="1"
+                                Grid.Row="1"
+                                IsReadOnly="{Binding !IsAsyncDataLoaded}"
+                                IsUndoEnabled="True"
+                                Name="tbPostOther"
+                                Text="{Binding PostTextOther, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
+                        </Grid>
 
-                <Grid Grid.Row="1">
-                    <TextBox
-                        AcceptsReturn="True"
-                        ClearSelectionOnLostFocus="False"
-                        FontFamily="monospaced"
-                        FontSize="16"
-                        IsReadOnly="{Binding !IsAsyncDataLoaded}"
-                        IsUndoEnabled="True"
-                        Name="tbPost"
-                        Text="{Binding PostText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-                    <Image
-                        HorizontalAlignment="Center"
-                        IsVisible="{Binding !IsAsyncDataLoaded}"
-                        Source="../Assets/PNG/Loading.png"
-                        VerticalAlignment="Center"
-                        Width="200" />
-                </Grid>
-
-                <Border Grid.Row="2">
-                    <Grid ColumnDefinitions="Auto,Auto,Auto">
-                        <Border
-                            BorderBrush="Black"
-                            BorderThickness="1"
-                            Grid.Column="0"
-                            Padding="4,2">
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="Манипуляции над превью" />
-                                <controls:ImgButton
-                                    BorderBrush="DodgerBlue"
-                                    Command="{Binding SaveAllPreview}"
-                                    Content="Сохранить все"
-                                    ImgSource="../Assets/PNG/save-all-64.png"
-                                    ImgWidth="32"
-                                    IsEnabled="{Binding IsAsyncDataLoaded}" />
-                            </StackPanel>
-                        </Border>
-
-                        <ListBox Grid.Column="1" ItemsSource="{Binding Attachments}">
-                            <ListBox.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ListBox.ItemsPanel>
-                            <ListBox.ItemTemplate>
-                                <DataTemplate DataType="m:PreviewImage">
-                                    <Border BorderBrush="Black" BorderThickness="1">
-                                        <Grid>
-                                            <Image
-                                                Source="{Binding Image}"
-                                                VerticalAlignment="Center"
-                                                Width="205" />
-                                            <TextBlock
-                                                Background="White"
-                                                FontWeight="Bold"
-                                                HorizontalAlignment="Left"
-                                                Text="{Binding Id}"
-                                                VerticalAlignment="Top" />
-                                            <StackPanel
-                                                HorizontalAlignment="Right"
-                                                Orientation="Horizontal"
-                                                VerticalAlignment="Top">
-                                                <Button
-                                                    Background="White"
-                                                    Classes="AttachControlButton"
-                                                    Command="{Binding RemoveBgAttach}"
-                                                    CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
-                                                    DataContext="{Binding $parent[Window].DataContext}"
-                                                    IsEnabled="{Binding IsAsyncDataLoaded}"
-                                                    x:DataType="vm:PostingWindowViewModel">
-                                                    <Image Source="../Assets/PNG/magic-40.png" />
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-
-                        <Border Grid.Column="2" Padding="2">
-                            <StackPanel Orientation="Vertical">
-                                <TextBlock Text="Коллаж" />
-                                <Image
-                                    Source="{Binding Collage}"
-                                    VerticalAlignment="Center"
-                                    Width="205" />
-                            </StackPanel>
-                        </Border>
+                        <Image
+                            HorizontalAlignment="Center"
+                            IsVisible="{Binding !IsAsyncDataLoaded}"
+                            Source="../Assets/PNG/Loading.png"
+                            VerticalAlignment="Center"
+                            Width="200" />
                     </Grid>
-                </Border>
 
-            </Grid>
+                    <Border Grid.Row="1">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto">
+                            <Border
+                                BorderBrush="Gray"
+                                BorderThickness="1"
+                                Grid.Column="0"
+                                Margin="1"
+                                Padding="4,2">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="Манипуляции над превью" />
+                                    <controls:ImgButton
+                                        BorderBrush="DodgerBlue"
+                                        Command="{Binding SaveAllPreview}"
+                                        Content="Сохранить все"
+                                        ImgSource="../Assets/PNG/save-all-64.png"
+                                        ImgWidth="32"
+                                        IsEnabled="{Binding IsAsyncDataLoaded}" />
+                                </StackPanel>
+                            </Border>
+
+                            <ListBox Grid.Column="1" ItemsSource="{Binding Attachments}">
+                                <ListBox.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal" />
+                                    </ItemsPanelTemplate>
+                                </ListBox.ItemsPanel>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate DataType="m:PreviewImage">
+                                        <Border BorderBrush="Black" BorderThickness="1">
+                                            <Grid>
+                                                <Image
+                                                    Source="{Binding Image}"
+                                                    VerticalAlignment="Center"
+                                                    Width="205" />
+                                                <TextBlock
+                                                    Background="White"
+                                                    FontWeight="Bold"
+                                                    HorizontalAlignment="Left"
+                                                    Text="{Binding Id}"
+                                                    VerticalAlignment="Top" />
+                                                <StackPanel
+                                                    HorizontalAlignment="Right"
+                                                    Orientation="Horizontal"
+                                                    VerticalAlignment="Top">
+                                                    <Button
+                                                        Background="White"
+                                                        Classes="AttachControlButton"
+                                                        Command="{Binding RemoveBgAttach}"
+                                                        CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
+                                                        DataContext="{Binding $parent[Window].DataContext}"
+                                                        IsEnabled="{Binding IsAsyncDataLoaded}"
+                                                        x:DataType="vm:PostingWindowViewModel">
+                                                        <Image Source="../Assets/PNG/magic-40.png" />
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+
+                            <Border Grid.Column="2" Padding="2">
+                                <StackPanel Orientation="Vertical">
+                                    <TextBlock Text="Коллаж" />
+                                    <Image
+                                        Source="{Binding Collage}"
+                                        VerticalAlignment="Center"
+                                        Width="205" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                </Grid>
+            </ScrollViewer>
         </DockPanel>
     </Border>
 

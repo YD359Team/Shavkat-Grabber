@@ -24,47 +24,47 @@ public partial class PostingWindow : Window
 
     private void BtnLinkOnClick(object? sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(tbPost.SelectedText))
+        if (string.IsNullOrWhiteSpace(tbPostTg.SelectedText))
             return;
 
-        int start = tbPost.SelectionStart;
-        int end = tbPost.SelectionEnd;
+        int start = tbPostTg.SelectionStart;
+        int end = tbPostTg.SelectionEnd;
         _vm.MorphText(start, end, "[", "]()");
-        tbPost.SelectionStart = start + 1;
-        tbPost.SelectionEnd = end + 1;
+        tbPostTg.SelectionStart = start + 1;
+        tbPostTg.SelectionEnd = end + 1;
     }
 
     private void BtnItalicOnClick(object? sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(tbPost.SelectedText))
+        if (string.IsNullOrWhiteSpace(tbPostTg.SelectedText))
             return;
 
-        int start = tbPost.SelectionStart;
-        int end = tbPost.SelectionEnd;
+        int start = tbPostTg.SelectionStart;
+        int end = tbPostTg.SelectionEnd;
         _vm.MorphText(start, end, "_");
-        tbPost.SelectionStart = start + 1;
-        tbPost.SelectionEnd = end + 1;
+        tbPostTg.SelectionStart = start + 1;
+        tbPostTg.SelectionEnd = end + 1;
     }
 
     private void BtnBoldOnClick(object? sender, RoutedEventArgs e)
     {
-        if (string.IsNullOrWhiteSpace(tbPost.SelectedText))
+        if (string.IsNullOrWhiteSpace(tbPostTg.SelectedText))
             return;
 
-        int start = tbPost.SelectionStart;
-        int end = tbPost.SelectionEnd;
+        int start = tbPostTg.SelectionStart;
+        int end = tbPostTg.SelectionEnd;
         _vm.MorphText(start, end, "*");
-        tbPost.SelectionStart = start + 1;
-        tbPost.SelectionEnd = end + 1;
+        tbPostTg.SelectionStart = start + 1;
+        tbPostTg.SelectionEnd = end + 1;
     }
 
     private void OnLoaded(object? sender, RoutedEventArgs e)
     {
         _vm = (PostingWindowViewModel)DataContext!;
-        tbPost.PastingFromClipboard += TbPostOnPastingFromClipboard;
+        tbPostTg.PastingFromClipboard += tbPostTgOnPastingFromClipboard;
     }
 
-    private async void TbPostOnPastingFromClipboard(object? sender, RoutedEventArgs e)
+    private async void tbPostTgOnPastingFromClipboard(object? sender, RoutedEventArgs e)
     {
         var clipboard = this.Clipboard;
         var dataObject =

@@ -27,7 +27,7 @@ public class PostingWindowViewModel : ChildViewModel
     private readonly Logic.GigaChatApi _gigaChatApi;
     private readonly Logic.TelegramBotApi _telegram;
 
-    private Good[] _goods;
+    private readonly Good[] _goods;
 
     public bool IsAsyncDataLoaded
     {
@@ -55,11 +55,17 @@ public class PostingWindowViewModel : ChildViewModel
 
     public Bitmap Collage
     {
-        get => field; 
+        get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public string PostText
+    public string PostTextTg
+    {
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public string PostTextOther
     {
         get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
@@ -88,7 +94,12 @@ public class PostingWindowViewModel : ChildViewModel
     public PostingWindowViewModel()
         : base(null, null, null) { }
 
-    public PostingWindowViewModel(FileSystemManager fsManager, WindowManager manager, AppSettings appSettings, Good[] goods)
+    public PostingWindowViewModel(
+        FileSystemManager fsManager,
+        WindowManager manager,
+        AppSettings appSettings,
+        Good[] goods
+    )
         : base(fsManager, manager, appSettings)
     {
         _goods = goods;
@@ -109,7 +120,7 @@ public class PostingWindowViewModel : ChildViewModel
             getImages
         );
 
-        Attachments.Sort();
+        //Attachments.Sort();
 
         while (ImageLoaded < _goods.Length)
         {
@@ -120,9 +131,18 @@ public class PostingWindowViewModel : ChildViewModel
         CreateCollage();
 
         // текст
-        PostText = await GetTextFromGoods();
+        await CreateText();
 
         IsAsyncDataLoaded = true;
+    }
+
+    private async Task CreateText()
+    {
+        TextController tc = new();
+        // ставить false для дебага
+        var result = await tc.CreateTextVariantsAsync(Settings, _goods, _gigaChatApi, false);
+        PostTextTg = result.Value.Markdown;
+        PostTextOther = result.Value.PlainText;
     }
 
     private void CreateCollage()
@@ -133,7 +153,8 @@ public class PostingWindowViewModel : ChildViewModel
         {
             var good = _goods[index];
             var attach = Attachments.FirstOrDefault(x => x.Id == index + 1);
-            if (attach is null) continue;
+            if (attach is null)
+                continue;
 
             images.Add(new ImageWithArticle(good.Article, attach.Image));
         }
@@ -144,73 +165,6 @@ public class PostingWindowViewModel : ChildViewModel
     private async Task TgBotTask()
     {
         IsTgBotConnected = await _telegram.CheckConnection();
-    }
-
-    private async Task<string> GetTextFromGoods()
-    {
-        bool isSingleGood = _goods.Length == 1;
-
-        StringBuilder sb = new();
-
-        if (!string.IsNullOrWhiteSpace(Settings.StaticHeader))
-        {
-            sb.AppendLine(Settings.StaticHeader);
-            sb.AppendLine();
-        }
-
-/*IsGigaChatApiConnected*/
-        if (
-            #if DEBUG
-            false 
-            #elif RELEASE
-            true
-            #endif
-        )
-        {
-            string quest =
-                Settings.GigaChatPrompt + " " + string.Join(';', _goods.Select(x => x.Title));
-            Console.WriteLine("gigachat question...");
-            Result<AnswerRoot> answer = await _gigaChatApi.SendMessage(quest);
-            Console.WriteLine("gigachat anser");
-
-            if (answer.IsSuccess)
-            {
-                sb.AppendLine(
-                    answer
-                        .Value.choices.First()
-                        .message.content.Replace(@"\n", "\n")
-                        .Replace("**", "*")
-                        .Replace("__", "_")
-                        .Replace("(", @"\(")
-                        .Replace(")", @"\)")
-                );
-                sb.AppendLine();
-            }
-        }
-
-        for (var index = 0; index < _goods.Length; index++)
-        {
-            var good = _goods[index];
-
-            if (isSingleGood)
-            {
-                sb.AppendLine($"[{good.Title}]({good.Url})");
-            }
-            else
-            {
-                sb.AppendLine($"{index + 1}. [{good.Title}]({good.Url})");
-            }
-
-            sb.AppendLine($"💰 {good.Price}");
-        }
-
-        if (!string.IsNullOrWhiteSpace(Settings.StaticFooter))
-        {
-            sb.AppendLine();
-            sb.AppendLine(Settings.StaticFooter);
-        }
-
-        return sb.ToString();
     }
 
     private async Task GetImagesFromGoods()
@@ -261,7 +215,10 @@ public class PostingWindowViewModel : ChildViewModel
 
             if (PostTelegram)
             {
-                Result<int> result = await _telegram.Post(PostText, Attachments.Select(x => x.Image).ToArray());
+                Result<int> result = await _telegram.Post(
+                    PostTextTg,
+                    Attachments.Select(x => x.Image).ToArray()
+                );
                 tgPostId = result.Value;
             }
 
@@ -271,10 +228,12 @@ public class PostingWindowViewModel : ChildViewModel
 
                 string tgPostUrl = $"https://t.me/{Settings.TgChannelId[1..]}/{tgPostId}";
 
-
                 string collagePath = FsManager.SaveBitmapInTempAndGetFullPath(Collage);
-                using PinterestDriver driver = await DriverBase.CreateAsync<PinterestDriver>(FsManager, Settings);
-                await driver.PostInPinterest(PostText, collagePath);
+                using PinterestDriver driver = await DriverBase.CreateAsync<PinterestDriver>(
+                    FsManager,
+                    Settings
+                );
+                await driver.PostInPinterest(PostTextOther, collagePath);
             }
         }
         catch (Exception ex)
@@ -317,8 +276,8 @@ public class PostingWindowViewModel : ChildViewModel
 
             var (path, targetPath) = SaveBitmap(bmp);
 
-            string args = string.IsNullOrWhiteSpace(Settings.RemoveBgColor) 
-                ? $"--api-key {Settings.RemoveBgApiKey} \"{path}\"" 
+            string args = string.IsNullOrWhiteSpace(Settings.RemoveBgColor)
+                ? $"--api-key {Settings.RemoveBgApiKey} \"{path}\""
                 : $"--api-key {Settings.RemoveBgApiKey} \"{path}\" --bg-color {Settings.RemoveBgColor}";
             await FsManager.StartProcessAndWait(Settings.RemoveBgCliPath, args);
             await Task.Delay(250);
@@ -370,24 +329,18 @@ public class PostingWindowViewModel : ChildViewModel
 
     public void MorphText(int from, int to, string separator)
     {
-        string selectedText = PostText;
+        string selectedText = PostTextTg;
         string s1 = selectedText.Insert(from, separator);
         string s2 = s1.Insert(to + 1, separator);
-        Console.WriteLine($"before: {selectedText}");
-        Console.WriteLine($"insert 1: {s1}");
-        Console.WriteLine($"insert 2: {s2}");
-        PostText = s2;
+        PostTextTg = s2;
     }
 
     public void MorphText(int from, int to, string lSeparator, string rSeparator)
     {
-        string selectedText = PostText;
+        string selectedText = PostTextTg;
         string s1 = selectedText.Insert(from, lSeparator);
         string s2 = s1.Insert(to + 1, rSeparator);
-        Console.WriteLine($"before: {selectedText}");
-        Console.WriteLine($"insert 1: {s1}");
-        Console.WriteLine($"insert 2: {s2}");
-        PostText = s2;
+        PostTextTg = s2;
     }
 
     public async void SaveAllPreview()
@@ -397,7 +350,8 @@ public class PostingWindowViewModel : ChildViewModel
             foreach (var attach in Attachments)
             {
                 string? path = await WinManager.SaveFileDialog(WindowManager.FileFormats.Png);
-                if (path is null) continue;
+                if (path is null)
+                    continue;
                 attach.Image.Save(path);
             }
         }

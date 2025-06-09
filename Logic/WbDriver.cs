@@ -107,26 +107,11 @@ public class WbDriver : DriverBase
                     await goodPage.QuerySelectorAsync(".price-block__wallet-price")
                 )?.TextContentAsync() ?? "N/A";
             SendLogMessage(new LogMessage($"- price", LogMessageTypes.Success));
-            var oldPrice =
-                await (
-                    await goodPage.QuerySelectorAsync(".price-block__old-price")
-                )?.TextContentAsync() ?? "N/A";
-            SendLogMessage(new LogMessage($"- old price", LogMessageTypes.Success));
-            var vendor =
-                await (
-                    await goodPage.QuerySelectorAsync(".product-page__header-brand")
-                )?.TextContentAsync() ?? "N/A";
-            SendLogMessage(new LogMessage($"- vendor", LogMessageTypes.Success));
             var imgUrl =
                 await (
                     await goodPage.QuerySelectorAsync(".zoom-image-container img")
                 )?.GetAttributeAsync("src") ?? "N/A";
             SendLogMessage(new LogMessage($"- image url", LogMessageTypes.Success));
-            var rating =
-                await (
-                    await goodPage.QuerySelectorAsync(".product-review__rating")
-                )?.TextContentAsync() ?? "N/A";
-            SendLogMessage(new LogMessage($"- rating", LogMessageTypes.Success));
 
             Good good = new Good
             {
@@ -134,10 +119,7 @@ public class WbDriver : DriverBase
                 Url = url,
                 Title = title,
                 Price = price,
-                OldPrice = oldPrice,
-                Vendor = vendor,
                 ImageUrl = imgUrl,
-                Rating = rating,
             };
             return good;
         }

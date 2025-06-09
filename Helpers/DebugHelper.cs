@@ -17,11 +17,8 @@ public static class DebugHelper
             Article = Guid.NewGuid().ToString(),
             Url = $"https://www.wildberries.ru/catalog/{_counter}/detail.aspx",
             ImageUrl = $"https://api.slingacademy.com/public/sample-photos/{_counter}.jpeg",
-            OldPrice = oldPrice.ToString(),
             Price = price.ToString(),
-            Rating = "5",
             Title = $"Тестовый товар #{_counter}",
-            Vendor = "Производитель",
         };
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Notifications;
@@ -123,12 +124,9 @@ public class MainWindowViewModel : ViewModelBase
                 ),
                 new TextColumn<GoodItem, string>("Артикул", x => x.Good.Article),
                 new TextColumn<GoodItem, string>("Название", x => x.Good.Title),
-                new TextColumn<GoodItem, string>("Производитель", x => x.Good.Vendor),
                 new TextColumn<GoodItem, string>("Цена", x => x.Good.Price),
-                new TextColumn<GoodItem, string>("Старая цена", x => x.Good.OldPrice),
                 new TextColumn<GoodItem, string>("URL", x => x.Good.Url),
                 new TextColumn<GoodItem, string>("Фото", x => x.Good.ImageUrl),
-                new TextColumn<GoodItem, string>("Рейтинг", x => x.Good.Rating),
             },
         };
 
@@ -158,7 +156,7 @@ public class MainWindowViewModel : ViewModelBase
         _settings = SerializeHelper.Deserialize<AppSettings>(json);
     }
 
-    public async void Start()
+    public async Task Start()
     {
         IsLoading = true;
         string[] keyWords = Root.OfType<TreeViewNodeGroup>()
@@ -202,7 +200,7 @@ public class MainWindowViewModel : ViewModelBase
         );
     }
 
-    public async void Export(object eFormat)
+    public async Task Export(object eFormat)
     {
         string formatStr = SerializeHelper.Serialize(eFormat);
         var format = Enum.Parse<WindowManager.FileFormats>(formatStr.ToUpperInvariant());

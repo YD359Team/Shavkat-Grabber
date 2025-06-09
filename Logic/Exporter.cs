@@ -15,16 +15,7 @@ public class Exporter
         await using StreamWriter sw = new StreamWriter(filePath);
         foreach (var item in goods)
         {
-            string[] a =
-            [
-                item.Article,
-                item.Title,
-                item.Price,
-                item.OldPrice,
-                item.Vendor,
-                item.Url,
-                item.ImageUrl,
-            ];
+            string[] a = [item.Article, item.Title, item.Price, item.Url, item.ImageUrl];
             string ch = string.Join(";;", a);
             await sw.WriteLineAsync(ch);
         }
@@ -40,8 +31,6 @@ public class Exporter
             writer.Write(item.Article, 1, row);
             writer.Write(item.Title, 2, row);
             writer.Write(item.Price, 3, row);
-            writer.Write(item.OldPrice, 4, row);
-            writer.Write(item.Vendor, 5, row);
             writer.Write(item.Url, 6, row);
             writer.Write(item.ImageUrl, 7, row);
             row++;
