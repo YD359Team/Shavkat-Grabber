@@ -10,7 +10,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Message = Telegram.Bot.Types.Message;
 
-namespace Shavkat_grabber.Logic;
+namespace Shavkat_grabber.Logic.API;
 
 public class TelegramBotApi
 {

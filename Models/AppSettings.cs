@@ -32,7 +32,6 @@ public class AppSettings : ReactiveObject
     [JsonProperty]
     public string? TgBotToken { get; set; }
 
-    // Template
     [JsonProperty]
     public string? StaticHeader { get; set; }
 

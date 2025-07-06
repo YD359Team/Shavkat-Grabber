@@ -15,17 +15,19 @@ using ReactiveUI;
 using Shavkat_grabber.Extensions;
 using Shavkat_grabber.Logic;
 using Shavkat_grabber.Logic.Abstract;
+using Shavkat_grabber.Logic.API;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Models.Json;
 using Shavkat_grabber.Pattern;
 using Shavkat_grabber.Views;
+using YDs_DLL_BASE.Extensions;
 
 namespace Shavkat_grabber.ViewModels;
 
 public class PostingWindowViewModel : ChildViewModel
 {
-    private readonly Logic.GigaChatApi _gigaChatApi;
-    private readonly Logic.TelegramBotApi _telegram;
+    private readonly GigaChatApi _gigaChatApi;
+    private readonly TelegramBotApi _telegram;
 
     private readonly Good[] _goods;
 
@@ -53,19 +55,19 @@ public class PostingWindowViewModel : ChildViewModel
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
+    public bool IsImagesLoaded
+    {
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
     public Bitmap Collage
     {
         get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public string PostTextTg
-    {
-        get => field;
-        set => this.RaiseAndSetIfChanged(ref field, value);
-    }
-
-    public string PostTextOther
+    public string PostText
     {
         get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
@@ -111,14 +113,11 @@ public class PostingWindowViewModel : ChildViewModel
 
     private async Task InitAsyncData()
     {
-        //Task gigaChatApiTask = GigaChatApiTask();
+        IsGigaChatApiConnected = true;
         Task tgBotTask = TgBotTask();
         Task getImages = GetImagesFromGoods();
 
-        await Task.WhenAll( /*gigaChatApiTask*/
-            tgBotTask,
-            getImages
-        );
+        await Task.WhenAll(tgBotTask, getImages);
 
         //Attachments.Sort();
 
@@ -126,6 +125,8 @@ public class PostingWindowViewModel : ChildViewModel
         {
             await Task.Delay(200);
         }
+
+        IsImagesLoaded = true;
 
         // коллаж
         CreateCollage();
@@ -138,11 +139,12 @@ public class PostingWindowViewModel : ChildViewModel
 
     private async Task CreateText()
     {
-        TextController tc = new();
+        // TODO: убрано всё
+        /*TextController tc = new();
         // ставить false для дебага
         var result = await tc.CreateTextVariantsAsync(Settings, _goods, _gigaChatApi, false);
         PostTextTg = result.Value.Markdown;
-        PostTextOther = result.Value.PlainText;
+        PostTextOther = result.Value.PlainText;*/
     }
 
     private void CreateCollage()
@@ -216,7 +218,7 @@ public class PostingWindowViewModel : ChildViewModel
             if (PostTelegram)
             {
                 Result<int> result = await _telegram.Post(
-                    PostTextTg,
+                    PostText,
                     Attachments.Select(x => x.Image).ToArray()
                 );
                 tgPostId = result.Value;
@@ -233,7 +235,7 @@ public class PostingWindowViewModel : ChildViewModel
                     FsManager,
                     Settings
                 );
-                await driver.PostInPinterest(PostTextOther, collagePath);
+                await driver.PostInPinterest(PostText, collagePath);
             }
         }
         catch (Exception ex)
@@ -264,6 +266,39 @@ public class PostingWindowViewModel : ChildViewModel
             throw new NotImplementedException(bmpData.GetType().ToString());
         }
         Attachments.Add(new PreviewImage(Attachments.Count + 1, bmp));
+    }
+
+    public async void RemoveBgAttachAll()
+    {
+        try
+        {
+            IsAsyncDataLoaded = false;
+
+            foreach (var attach in Attachments)
+            {
+                Bitmap bmp = attach.Image;
+                var (path, targetPath) = SaveBitmap(bmp);
+
+                string args = Settings.RemoveBgColor.IsNullOrWhiteSpace()
+                    ? $"--api-key {Settings.RemoveBgApiKey} \"{path}\""
+                    : $"--api-key {Settings.RemoveBgApiKey} \"{path}\" --bg-color {Settings.RemoveBgColor}";
+                await FsManager.StartProcessAndWait(Settings.RemoveBgCliPath, args);
+                await Task.Delay(250);
+
+                attach.Image = new Bitmap(targetPath);
+                attach.RaisePropertyChanged(nameof(attach.Image));
+            }
+
+            CreateCollage();
+        }
+        catch (Exception ex)
+        {
+            await WinManager.ShowError(ex);
+        }
+        finally
+        {
+            IsAsyncDataLoaded = true;
+        }
     }
 
     public async void RemoveBgAttach(object e)
@@ -325,22 +360,6 @@ public class PostingWindowViewModel : ChildViewModel
         DataObject obj = new();
         obj.Set("image/png", stream.ToArray());
         await WinManager.MainWindow.Clipboard.SetDataObjectAsync(obj);
-    }
-
-    public void MorphText(int from, int to, string separator)
-    {
-        string selectedText = PostTextTg;
-        string s1 = selectedText.Insert(from, separator);
-        string s2 = s1.Insert(to + 1, separator);
-        PostTextTg = s2;
-    }
-
-    public void MorphText(int from, int to, string lSeparator, string rSeparator)
-    {
-        string selectedText = PostTextTg;
-        string s1 = selectedText.Insert(from, lSeparator);
-        string s2 = s1.Insert(to + 1, rSeparator);
-        PostTextTg = s2;
     }
 
     public async void SaveAllPreview()

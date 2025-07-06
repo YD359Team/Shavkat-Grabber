@@ -1,133 +1,201 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:vm="using:Shavkat_grabber.ViewModels"
-        mc:Ignorable="d" 
-        d:DesignWidth="700" d:DesignHeight="575"
-        Width="700" Height="575"
-        x:Class="Shavkat_grabber.Views.SettingsWindow"
-        Title="Настройки"
-        WindowStartupLocation="CenterOwner"
-        x:DataType="vm:SettingsWindowViewMode">
+﻿<Window
+    Height="768"
+    Title="Настройки"
+    Width="700"
+    WindowStartupLocation="CenterOwner"
+    d:DesignHeight="768"
+    d:DesignWidth="700"
+    mc:Ignorable="d"
+    x:Class="Shavkat_grabber.Views.SettingsWindow"
+    x:DataType="vm:SettingsWindowViewMode"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="using:Shavkat_grabber.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Design.DataContext>
-        <vm:SettingsWindowViewMode/>
+        <vm:SettingsWindowViewMode />
     </Design.DataContext>
 
-    <Border Padding="4 2">
+    <Border Padding="4,2">
         <DockPanel>
             <Border DockPanel.Dock="Bottom">
                 <Grid ColumnDefinitions="*,Auto">
-                    <StackPanel Grid.Column="0" 
-                                Orientation="Horizontal">
-                        <Button Content="Сохранить"
-                                Command="{Binding Save}"
-                                CommandParameter="{Binding $parent[Window]}" />
-                        <Button Content="Отмена"
-                                Command="{Binding Cancel}"
-                                CommandParameter="{Binding $parent[Window]}" />
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Button
+                            Command="{Binding Save}"
+                            CommandParameter="{Binding $parent[Window]}"
+                            Content="Сохранить" />
+                        <Button
+                            Command="{Binding Cancel}"
+                            CommandParameter="{Binding $parent[Window]}"
+                            Content="Отмена" />
                     </StackPanel>
 
-                    <StackPanel Grid.Column="1"
-                                Orientation="Horizontal">
-                        <Button Content="Загрузить из файла"
-                                Command="{Binding LoadFromFile}"/>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Command="{Binding LoadFromFile}" Content="Загрузить из файла" />
                     </StackPanel>
                 </Grid>
             </Border>
-            <ScrollViewer VerticalScrollBarVisibility="Visible"
-                          AllowAutoHide="False">
-            <Grid ColumnDefinitions="220,400" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
-                <TextBlock Grid.Row="0" Grid.Column="0" 
-                           Text="Путь к Chrome.exe"/>
-                <TextBox Grid.Row="0" Grid.Column="1" 
-                         Name="tbChromePath"
-                         Text="{Binding AppSettings.ChromePath, Mode=TwoWay}"/>
-                <!-- Gigachat -->
-                <TextBlock Grid.Row="1" Grid.Column="0" 
-                           Text="GigaChat auth key"/>
-                <TextBox Grid.Row="1" Grid.Column="1" 
-                         Name="tbGigaChatAuthKey"
-                         Text="{Binding AppSettings.GigaChatAuthKey, Mode=TwoWay}"/>
-                <TextBlock Grid.Row="2" Grid.Column="0" 
-                           Text="GigaChat scope"/>
-                <TextBox Grid.Row="2" Grid.Column="1" 
-                         Name="tbGigaChatScope"
-                         Text="{Binding AppSettings.GigaChatScope, Mode=TwoWay}"/>
-                <TextBlock Grid.Row="3" Grid.Column="0" 
-                           Text="GigaChat промпт"/>
-                <TextBox Grid.Row="3" Grid.Column="1" 
-                         Name="tbGigaChatPrompt"
-                         Text="{Binding AppSettings.GigaChatPrompt, Mode=TwoWay}"/>
-                <!-- Tg -->
-                <TextBlock Grid.Row="4" Grid.Column="0" 
-                           Text="Адрес канала [?]"
-                           ToolTip.Tip="Канал для постинга. Адрес начинается с со знака @"/>
-                <TextBox Grid.Row="4" Grid.Column="1" 
-                         Name="tbChId"
-                         Text="{Binding AppSettings.TgChannelId, Mode=TwoWay}"/>
-                <TextBlock Grid.Row="5" Grid.Column="0" 
-                           Text="Токен бота"/>
-                <TextBox Grid.Row="5" Grid.Column="1"
-                         Name="tbBotToken"
-                         Text="{Binding AppSettings.TgBotToken, Mode=TwoWay}"/>
-                <!-- Template -->
-                <TextBlock Grid.Row="6" Grid.Column="0" 
-                           Text="Статичный хедер [?]"
-                           ToolTip.Tip="Вставляется в начале текста вместе с новой строкой"/>
-                <TextBox Grid.Row="6" Grid.Column="1" 
-                         Name="tbStaticHeader"
-                         Text="{Binding AppSettings.StaticHeader, Mode=TwoWay}"
-                         Height="130"
-                         AcceptsReturn="True"
-                         FontFamily="monospaced"/>
-                <TextBlock Grid.Row="7" Grid.Column="0" 
-                           Text="Статичный футер [?]"
-                           ToolTip.Tip="Вставляется в конце текста вместе с новой строкой"/>
-                <TextBox Grid.Row="7" Grid.Column="1"
-                         Name="tbStaticFooter"
-                         Text="{Binding AppSettings.StaticFooter, Mode=TwoWay}"
-                         Height="130"
-                         AcceptsReturn="True"
-                         FontFamily="monospaced"/>
-                <!-- Remove bg -->
-                <TextBlock Grid.Row="8" Grid.Column="0" 
-                           Text="Путь к файлу remove-bg-cli.exe"/>
-                <TextBox Grid.Row="8" Grid.Column="1"
-                         Name="tbRemoveBgCliPath"
-                         Text="{Binding AppSettings.RemoveBgCliPath, Mode=TwoWay}"/>
-                <TextBlock Grid.Row="9" Grid.Column="0" 
-                           Text="Ключ API RemoveBg"/>
-                <TextBox Grid.Row="9" Grid.Column="1" 
-                         Name="tbRemoveBgApi"
-                         Text="{Binding AppSettings.RemoveBgApiKey, Mode=TwoWay}"/>
-                <TextBlock Grid.Row="10" Grid.Column="0" 
-                           Text="Цвет фона [?]"
-                           ToolTip.Tip="Цвет в формате rrggbb, где каждая буква - это число от 0 до f"/>
-                <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal">
-                    <TextBox Name="tbRemoveBgColor"
-                             Text="{Binding AppSettings.RemoveBgColor, Mode=TwoWay}"
-                             MaxLength="6"
-                             Width="80"/>
-                    <Border BorderBrush="Black"
-                            BorderThickness="2">
-                        <Rectangle Name="recColor" 
-                                   Width="32"/>
-                    </Border>
-                </StackPanel>
-                <!-- Pinterest -->
-                <TextBlock Grid.Row="11" Grid.Column="0" 
-                           Text="Почта Pinterest"/>
-                <TextBox Grid.Row="11" Grid.Column="1" 
-                         Name="tbPinterestEmail"
-                         Text="{Binding AppSettings.PinterestEmail, Mode=TwoWay}"/>
-                <TextBlock Grid.Row="12" Grid.Column="0" 
-                           Text="Пароль Pinterest"/>
-                <TextBox Grid.Row="12" Grid.Column="1" 
-                         Name="tbPinterestPassword"
-                         Text="{Binding AppSettings.PinterestPassword, Mode=TwoWay}"/>
-            </Grid>
+            <ScrollViewer AllowAutoHide="False" VerticalScrollBarVisibility="Visible">
+                <Grid ColumnDefinitions="220,400">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        Text="Путь к Chrome.exe" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="0"
+                        Name="tbChromePath"
+                        Text="{Binding AppSettings.ChromePath, Mode=TwoWay}" />
+                    <!--  Gigachat  -->
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="1"
+                        Text="GigaChat auth key" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="1"
+                        Name="tbGigaChatAuthKey"
+                        Text="{Binding AppSettings.GigaChatAuthKey, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="2"
+                        Text="GigaChat scope" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="2"
+                        Name="tbGigaChatScope"
+                        Text="{Binding AppSettings.GigaChatScope, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="3"
+                        Text="GigaChat промпт" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="3"
+                        Name="tbGigaChatPrompt"
+                        Text="{Binding AppSettings.GigaChatPrompt, Mode=TwoWay}" />
+                    <!--  Tg  -->
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="4"
+                        Text="Адрес канала [?]"
+                        ToolTip.Tip="Канал для постинга. Адрес начинается с со знака @" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="4"
+                        Name="tbChId"
+                        Text="{Binding AppSettings.TgChannelId, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="5"
+                        Text="Токен бота" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="5"
+                        Name="tbBotToken"
+                        Text="{Binding AppSettings.TgBotToken, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="6"
+                        Text="Статичный хедер [?]"
+                        ToolTip.Tip="Вставляется в начале текста вместе с новой строкой" />
+                    <TextBox
+                        AcceptsReturn="True"
+                        FontFamily="monospaced"
+                        Grid.Column="1"
+                        Grid.Row="6"
+                        Height="130"
+                        Name="tbStaticHeader"
+                        Text="{Binding AppSettings.StaticHeader, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="7"
+                        Text="Статичный футер [?]"
+                        ToolTip.Tip="Вставляется в конце текста вместе с новой строкой" />
+                    <TextBox
+                        AcceptsReturn="True"
+                        FontFamily="monospaced"
+                        Grid.Column="1"
+                        Grid.Row="7"
+                        Height="130"
+                        Name="tbStaticFooter"
+                        Text="{Binding AppSettings.StaticFooter, Mode=TwoWay}" />
+                    <!--  Remove bg  -->
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="8"
+                        Text="Путь к файлу remove-bg-cli.exe" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="8"
+                        Name="tbRemoveBgCliPath"
+                        Text="{Binding AppSettings.RemoveBgCliPath, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="9"
+                        Text="Ключ API RemoveBg" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="9"
+                        Name="tbRemoveBgApi"
+                        Text="{Binding AppSettings.RemoveBgApiKey, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="10"
+                        Text="Цвет фона [?]"
+                        ToolTip.Tip="Цвет в формате rrggbb, где каждая буква - это число от 0 до f" />
+                    <StackPanel
+                        Grid.Column="1"
+                        Grid.Row="10"
+                        Orientation="Horizontal">
+                        <TextBox
+                            MaxLength="6"
+                            Name="tbRemoveBgColor"
+                            Text="{Binding AppSettings.RemoveBgColor, Mode=TwoWay}"
+                            Width="80" />
+                        <Border BorderBrush="Black" BorderThickness="2">
+                            <Rectangle Name="recColor" Width="32" />
+                        </Border>
+                    </StackPanel>
+                    <!--  Pinterest  -->
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="11"
+                        Text="Почта Pinterest" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="11"
+                        Name="tbPinterestEmail"
+                        Text="{Binding AppSettings.PinterestEmail, Mode=TwoWay}" />
+                    <TextBlock
+                        Grid.Column="0"
+                        Grid.Row="12"
+                        Text="Пароль Pinterest" />
+                    <TextBox
+                        Grid.Column="1"
+                        Grid.Row="12"
+                        Name="tbPinterestPassword"
+                        Text="{Binding AppSettings.PinterestPassword, Mode=TwoWay}" />
+                </Grid>
             </ScrollViewer>
         </DockPanel>
     </Border>

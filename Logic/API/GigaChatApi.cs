@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -10,13 +11,15 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Authenticators.OAuth2;
+using Shavkat_grabber.Extensions;
+using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Models.Json;
 using Shavkat_grabber.Pattern;
 
-namespace Shavkat_grabber.Logic;
+namespace Shavkat_grabber.Logic.API;
 
-public class GigaChatApi : IDisposable
+public class GigaChatApi : ITextApi, IDisposable
 {
     private const string ApiUrl = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth";
     private const string MessageUrl =
@@ -54,6 +57,9 @@ public class GigaChatApi : IDisposable
         _httpClient.DefaultRequestHeaders.Accept.Add(
             new MediaTypeWithQualityHeaderValue("application/json")
         );
+
+        _httpClient.DefaultRequestHeaders.Clear(); // Перед установкой заголовков
+
         _httpClient.DefaultRequestHeaders.Add("RqUID", Guid.NewGuid().ToString());
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
             "Basic",
@@ -79,7 +85,7 @@ public class GigaChatApi : IDisposable
         }
     }
 
-    public async Task<Result<AnswerRoot>> SendMessage(string message)
+    private async Task<Result<AnswerRoot>> SendMessage(string message)
     {
         // Проверка и обновление токена
         if (_accessToken == null || DateTime.UtcNow.Ticks >= _accessToken.expires_at)
@@ -88,6 +94,8 @@ public class GigaChatApi : IDisposable
             if (!tokenResult.IsSuccess)
                 return Result<AnswerRoot>.Fail(tokenResult.Error);
         }
+
+        _httpClient.DefaultRequestHeaders.Clear(); // Перед установкой заголовков
 
         var request = new RestRequest(MessageUrl, Method.Post)
             .AddHeader("Accept", "application/json")
@@ -142,5 +150,13 @@ public class GigaChatApi : IDisposable
         _httpClient?.Dispose();
         _restClient?.Dispose();
         GC.SuppressFinalize(this);
+    }
+
+    public async Task<Result<string>> GetTextResultAsync(string input)
+    {
+        var result = await SendMessage(input);
+        if (!result.IsSuccess)
+            return Result<string>.Fail(result.Error);
+        return result.Value.choices.First().message.content.ToResult();
     }
 }

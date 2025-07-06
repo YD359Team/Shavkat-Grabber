@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Shavkat_grabber.Models;
+namespace Shavkat_grabber.Models.Tree;
 
 public class TreeViewNodeGroup : TreeViewNode
 {

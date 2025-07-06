@@ -1,52 +1,133 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Shavkat_grabber.Views.HelpWindow"
-        Title="Помощь"
-        WindowStartupLocation="CenterOwner">
+﻿<Window
+    Height="500"
+    Title="Помощь"
+    Width="700"
+    WindowStartupLocation="CenterOwner"
+    d:DesignHeight="500"
+    d:DesignWidth="700"
+    mc:Ignorable="d"
+    x:Class="Shavkat_grabber.Views.HelpWindow"
+    x:DataType="vm:HelpWindowViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:controls="clr-namespace:Shavkat_grabber.Views.Controls"
+    xmlns:conv="clr-namespace:Shavkat_grabber.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:m="clr-namespace:Shavkat_grabber.Models"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:vm="clr-namespace:Shavkat_grabber.ViewModels"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Window.Styles>
         <Style Selector="TextBlock.Group">
-            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontSize" Value="24" />
         </Style>
         <Style Selector="TextBlock[(Grid.Column)=0]">
-            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
     </Window.Styles>
 
-    <Border Padding="4 2"
-            BorderBrush="Black"
-            BorderThickness="1">
+    <Design.DataContext>
+        <vm:HelpWindowViewModel />
+    </Design.DataContext>
+
+    <Window.Resources>
+        <conv:ChatMessageTypeToBrushConverter x:Key="chatMessageTypeToBrushConverter" />
+        <conv:ChatMessageTypeToHorizontalAlignmentConverter x:Key="chatMessageTypeToHorizontalAlignmentConverter" />
+    </Window.Resources>
+
+    <Border
+        BorderBrush="Black"
+        BorderThickness="1"
+        Padding="4,2">
 
         <DockPanel>
 
-            <StackPanel DockPanel.Dock="Bottom" 
-                        Orientation="Horizontal">
-                <Button Name="BtnClose" 
-                        Content="Закрыть"/>
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+                <Button Content="Закрыть" Name="BtnClose" />
             </StackPanel>
 
-            <StackPanel Orientation="Vertical">
-            <TextBlock Classes="Group"
-                       Text="RemoveBg"/>
-            <Grid ColumnDefinitions="Auto,Auto"
-                  RowDefinitions="Auto,Auto">
-                <TextBlock Grid.Row="0" Grid.Column="0" 
-                           Text="Получить токен API"/>
-                <HyperlinkButton Grid.Row="0" Grid.Column="1"
-                                 Content="Перейти на BgRemover" 
-                                 NavigateUri="https://www.remove.bg/dashboard#api-key"/>
-                <TextBlock Grid.Row="1" Grid.Column="0" 
-                           Text="Скачать утилиту командной строки"/>
-                <HyperlinkButton Grid.Row="1" Grid.Column="1"
-                                 Content="Перейти на BgRemover" 
-                                 NavigateUri="https://www.remove.bg/a/image-background-removal-plugin-command-line-interface"/>
-            </Grid>
-        </StackPanel>
+            <TabControl>
+                <TabControl.Items>
+                    <TabItem Header="Справка">
+                        <Border>
+                            <StackPanel Orientation="Vertical">
+                                <TextBlock Classes="Group" Text="RemoveBg" />
+                                <Grid ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto">
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.Row="0"
+                                        Text="Получить токен API" />
+                                    <HyperlinkButton
+                                        Content="Перейти на BgRemover"
+                                        Grid.Column="1"
+                                        Grid.Row="0"
+                                        NavigateUri="https://www.remove.bg/dashboard#api-key" />
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Grid.Row="1"
+                                        Text="Скачать утилиту командной строки" />
+                                    <HyperlinkButton
+                                        Content="Перейти на BgRemover"
+                                        Grid.Column="1"
+                                        Grid.Row="1"
+                                        NavigateUri="https://www.remove.bg/a/image-background-removal-plugin-command-line-interface" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </TabItem>
+                    <TabItem Header="Проверка бота">
+                        <Border>
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Top" Text="Чат" />
+                                <Grid ColumnDefinitions="*,Auto" DockPanel.Dock="Bottom">
+                                    <TextBox
+                                        Grid.Column="0"
+                                        Text="{Binding ChatMessage, Mode=TwoWay}"
+                                        Watermark="Введите текст здесь..." />
+                                    <controls:ImgButton
+                                        Command="{Binding SendMessage}"
+                                        Content="Отправить"
+                                        Grid.Column="1"
+                                        ImgSource="../Assets/PNG/telegram-48.png"
+                                        ImgWidth="25"
+                                        IsEnabled="{Binding IsGigaChatEnabled}" />
+                                </Grid>
+                                <ListBox ItemsSource="{Binding Messages}" Width="525">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate DataType="m:ChatMessage">
+                                            <Border
+                                                BorderBrush="{Binding Type, Converter={StaticResource chatMessageTypeToBrushConverter}}"
+                                                BorderThickness="2"
+                                                HorizontalAlignment="{Binding Type, Converter={StaticResource chatMessageTypeToHorizontalAlignmentConverter}}"
+                                                MaxWidth="500"
+                                                MinWidth="200"
+                                                Padding="8,10">
+                                                <Grid ColumnDefinitions="Auto,Auto" MaxWidth="500">
+                                                    <TextBlock
+                                                        Grid.Column="0"
+                                                        HorizontalAlignment="Left"
+                                                        MaxWidth="400"
+                                                        Text="{Binding Text}"
+                                                        TextWrapping="Wrap" />
+                                                    <TextBlock
+                                                        FontFamily="monospaced"
+                                                        Foreground="Gray"
+                                                        Grid.Column="1"
+                                                        HorizontalAlignment="Right"
+                                                        Margin="2,0,0,0"
+                                                        Text="{Binding Time}" />
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </DockPanel>
+                        </Border>
+                    </TabItem>
+                </TabControl.Items>
+            </TabControl>
 
         </DockPanel>
-       
+
     </Border>
 </Window>

@@ -1,5 +1,7 @@
 ﻿<Window
+    Height="768"
     Title="Постинг"
+    Width="1300"
     WindowStartupLocation="CenterOwner"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -19,7 +21,7 @@
     </Design.DataContext>
 
     <Window.Styles>
-        <Style Selector="Button.AttachControlButton">
+        <Style Selector="controls|ImgButton.AttachControlButton">
             <Setter Property="Padding" Value="2" />
             <Setter Property="BorderBrush" Value="Black" />
             <Setter Property="BorderThickness" Value="0.75" />
@@ -41,137 +43,129 @@
         <DockPanel>
             <Border DockPanel.Dock="Top">
                 <StackPanel Orientation="Horizontal" Spacing="4">
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock HorizontalAlignment="Center" Text="Информация" />
-                        <StackPanel IsVisible="False" Orientation="Horizontal">
-                            <TextBlock Text="Связь с gigachat API: " />
-                            <TextBlock Text="{Binding IsGigaChatApiConnected}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Связь с тг ботом: " />
-                            <TextBlock Text="{Binding IsTgBotConnected}" />
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Загружено картинок: " />
-                            <TextBlock Text="{Binding ImageLoaded}" />
-                            <TextBlock Text=" из " />
-                            <TextBlock Text="{Binding Attachments.Count}" />
-                        </StackPanel>
-                    </StackPanel>
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock HorizontalAlignment="Center" Text="Конвейер постинга" />
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
-                                <Image
-                                    HorizontalAlignment="Center"
-                                    Source="../Assets/PNG/telegram-48.png"
-                                    Width="38" />
-                                <TextBlock Text="Telegram" />
-                                <ToggleSwitch HorizontalAlignment="Center" IsChecked="{Binding PostTelegram, Mode=TwoWay}" />
-                            </StackPanel>
-                            <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
-                                <Image
-                                    HorizontalAlignment="Center"
-                                    Source="../Assets/PNG/pinterest-48.png"
-                                    Width="38" />
-                                <TextBlock Text="Pinterest" />
-                                <ToggleSwitch HorizontalAlignment="Center" IsChecked="{Binding PostPinterest, Mode=TwoWay}" />
-                            </StackPanel>
-                            <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
-                                <Image
-                                    HorizontalAlignment="Center"
-                                    Source="../Assets/PNG/tiktok-48.png"
-                                    Width="38" />
-                                <TextBlock Text="Tiktok" />
-                                <ToggleSwitch
-                                    HorizontalAlignment="Center"
-                                    IsChecked="{Binding PostTiktok, Mode=TwoWay}"
-                                    IsEnabled="False" />
+                    <Border Padding="4,2" Width="250">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock HorizontalAlignment="Center" Text="Информация" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <!--  Связь с Giga chat  -->
+                                <StackPanel Orientation="Vertical" Spacing="3">
+                                    <Image
+                                        Source="../Assets/PNG/robot-64.png"
+                                        ToolTip.Tip="Связь с giga chat"
+                                        Width="32" />
+                                    <controls:Indicator IsChecked="{Binding IsGigaChatApiConnected}" />
+                                </StackPanel>
+                                <!--  Связь с тг ботом  -->
+                                <StackPanel Orientation="Vertical" Spacing="3">
+                                    <Image
+                                        Source="../Assets/PNG/robot-64.png"
+                                        ToolTip.Tip="Связь с тг ботом"
+                                        Width="32" />
+                                    <controls:Indicator IsChecked="{Binding IsTgBotConnected}" />
+                                </StackPanel>
+                                <!--  Загрузка превью  -->
+                                <StackPanel Orientation="Vertical" Spacing="3">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image
+                                            Source="../Assets/PNG/image-48.png"
+                                            ToolTip.Tip="Загружено изображений"
+                                            Width="32" />
+                                        <StackPanel IsVisible="{Binding !IsImagesLoaded}" Orientation="Horizontal">
+                                            <TextBlock Text="{Binding ImageLoaded}" />
+                                            <TextBlock Text="\" />
+                                            <TextBlock Text="{Binding Attachments.Count}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <controls:Indicator IsChecked="{Binding IsImagesLoaded}" />
+                                </StackPanel>
                             </StackPanel>
                         </StackPanel>
-                    </StackPanel>
+                    </Border>
+
+                    <Border Padding="4,2">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock HorizontalAlignment="Center" Text="Конвейер постинга" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                                    <Image
+                                        HorizontalAlignment="Center"
+                                        Source="../Assets/PNG/telegram-48.png"
+                                        Width="32" />
+                                    <controls:Indicator IsChecked="False" />
+                                </StackPanel>
+                                <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                                    <Image
+                                        HorizontalAlignment="Center"
+                                        Source="../Assets/PNG/pinterest-48.png"
+                                        Width="32" />
+                                    <controls:Indicator IsChecked="False" />
+                                </StackPanel>
+                                <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                                    <Image
+                                        HorizontalAlignment="Center"
+                                        Source="../Assets/PNG/tiktok-48.png"
+                                        Width="32" />
+                                    <controls:Indicator IsChecked="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Padding="4,2">
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock HorizontalAlignment="Center" Text="Постобработка" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <StackPanel HorizontalAlignment="Center" Orientation="Vertical">
+                                    <Image
+                                        HorizontalAlignment="Center"
+                                        Source="../Assets/PNG/storage-48.png"
+                                        Width="32" />
+                                    <controls:Indicator IsChecked="False" />
+                                </StackPanel>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
             <!--  Нижняя панель  -->
             <Border DockPanel.Dock="Bottom" Padding="4,2">
-                <controls:ImgButton
-                    BorderBrush="#29B6F6"
-                    Command="{Binding Post}"
-                    Content="Отправить"
-                    FontSize="16"
-                    HorizontalAlignment="Left"
-                    ImgSource="../Assets/PNG/telegram-48.png"
-                    ImgWidth="25"
-                    IsEnabled="{Binding IsAsyncDataLoaded}" />
+                <StackPanel Orientation="Horizontal" Spacing="3">
+                    <controls:ImgButton
+                        BorderBrush="#29B6F6"
+                        Command="{Binding Post}"
+                        Content="Отправить"
+                        FontSize="16"
+                        HorizontalAlignment="Left"
+                        ImgSource="../Assets/PNG/telegram-48.png"
+                        ImgWidth="25"
+                        IsEnabled="{Binding IsAsyncDataLoaded}" />
+                    <controls:ImgButton
+                        BorderBrush="CornflowerBlue"
+                        Command="{Binding Post}"
+                        Content="Сохранить в БД"
+                        FontSize="16"
+                        HorizontalAlignment="Left"
+                        ImgSource="../Assets/PNG/storage-48.png"
+                        ImgWidth="25"
+                        IsEnabled="{Binding IsAsyncDataLoaded}" />
+                </StackPanel>
             </Border>
             <ScrollViewer>
                 <Grid RowDefinitions="Auto,Auto">
                     <Grid Grid.Row="0">
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="*,*">
-                            <Border
-                                BorderBrush="Black"
-                                BorderThickness="0.75"
-                                Grid.Column="0"
-                                Grid.Row="0"
-                                Padding="4,2">
-                                <StackPanel Orientation="Horizontal" Spacing="3">
-                                    <StackPanel Orientation="Horizontal" Spacing="2">
-                                        <TextBlock Text="Markdown v2" VerticalAlignment="Center" />
-                                        <TextBlock
-                                            FontWeight="Bold"
-                                            Text="[?]"
-                                            ToolTip.Tip="Текст с поддержкой форматирования для Telegram"
-                                            VerticalAlignment="Center" />
-                                    </StackPanel>
-                                    <Button
-                                        Content="B"
-                                        FontWeight="Bold"
-                                        IsEnabled="{Binding IsAsyncDataLoaded}"
-                                        Name="btnBold" />
-                                    <Button
-                                        Content="i"
-                                        FontStyle="Italic"
-                                        IsEnabled="{Binding IsAsyncDataLoaded}"
-                                        Name="btnItalic" />
-                                    <Button
-                                        Content="a"
-                                        IsEnabled="{Binding IsAsyncDataLoaded}"
-                                        Name="btnLink" />
-                                </StackPanel>
-                            </Border>
-                            <TextBox
-                                AcceptsReturn="True"
-                                ClearSelectionOnLostFocus="False"
-                                FontFamily="monospaced"
-                                FontSize="16"
-                                Grid.Column="0"
-                                Grid.Row="1"
-                                IsReadOnly="{Binding !IsAsyncDataLoaded}"
-                                IsUndoEnabled="True"
-                                Name="tbPostTg"
-                                Text="{Binding PostTextTg, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-                            <Border
-                                BorderBrush="Black"
-                                BorderThickness="0.75"
-                                Grid.Column="1"
-                                Grid.Row="0"
-                                Padding="4,2">
-                                <TextBlock Text="Обычный текст" VerticalAlignment="Center" />
-                            </Border>
-                            <TextBox
-                                AcceptsReturn="True"
-                                ClearSelectionOnLostFocus="False"
-                                FontFamily="monospaced"
-                                FontSize="16"
-                                Grid.Column="1"
-                                Grid.Row="1"
-                                IsReadOnly="{Binding !IsAsyncDataLoaded}"
-                                IsUndoEnabled="True"
-                                Name="tbPostOther"
-                                Text="{Binding PostTextOther, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
-                        </Grid>
+                        <TextBox
+                            Classes="Multiline"
+                            ClearSelectionOnLostFocus="False"
+                            FontFamily="monospaced"
+                            FontSize="16"
+                            Grid.Column="0"
+                            Height="450"
+                            IsReadOnly="{Binding !IsAsyncDataLoaded}"
+                            Name="tbPostTemplate"
+                            Text="{Binding PostText, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" />
 
                         <Image
+                            Grid.ColumnSpan="2"
                             HorizontalAlignment="Center"
                             IsVisible="{Binding !IsAsyncDataLoaded}"
                             Source="../Assets/PNG/Loading.png"
@@ -187,19 +181,29 @@
                                 Grid.Column="0"
                                 Margin="1"
                                 Padding="4,2">
-                                <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Vertical" Spacing="3">
                                     <TextBlock Text="Манипуляции над превью" />
+                                    <controls:ImgButton
+                                        BorderBrush="DodgerBlue"
+                                        Command="{Binding RemoveBgAttachAll}"
+                                        Content="Удалить фон всем"
+                                        ImgSource="../Assets/PNG/magic-40.png"
+                                        ImgWidth="25"
+                                        IsEnabled="{Binding IsAsyncDataLoaded}" />
                                     <controls:ImgButton
                                         BorderBrush="DodgerBlue"
                                         Command="{Binding SaveAllPreview}"
                                         Content="Сохранить все"
                                         ImgSource="../Assets/PNG/save-all-64.png"
-                                        ImgWidth="32"
+                                        ImgWidth="25"
                                         IsEnabled="{Binding IsAsyncDataLoaded}" />
                                 </StackPanel>
                             </Border>
 
-                            <ListBox Grid.Column="1" ItemsSource="{Binding Attachments}">
+                            <ListBox
+                                Grid.Column="1"
+                                ItemsSource="{Binding Attachments}"
+                                ScrollViewer.HorizontalScrollBarVisibility="Visible">
                                 <ListBox.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <StackPanel Orientation="Horizontal" />
@@ -223,16 +227,17 @@
                                                     HorizontalAlignment="Right"
                                                     Orientation="Horizontal"
                                                     VerticalAlignment="Top">
-                                                    <Button
+                                                    <controls:ImgButton
                                                         Background="White"
                                                         Classes="AttachControlButton"
                                                         Command="{Binding RemoveBgAttach}"
                                                         CommandParameter="{Binding $parent[ListBoxItem].DataContext}"
                                                         DataContext="{Binding $parent[Window].DataContext}"
+                                                        ImgSource="../Assets/PNG/magic-40.png"
+                                                        ImgWidth="25"
                                                         IsEnabled="{Binding IsAsyncDataLoaded}"
-                                                        x:DataType="vm:PostingWindowViewModel">
-                                                        <Image Source="../Assets/PNG/magic-40.png" />
-                                                    </Button>
+                                                        ToolTip.Tip="Удалить фон"
+                                                        x:DataType="vm:PostingWindowViewModel" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -246,7 +251,7 @@
                                     <Image
                                         Source="{Binding Collage}"
                                         VerticalAlignment="Center"
-                                        Width="205" />
+                                        Width="245" />
                                 </StackPanel>
                             </Border>
                         </Grid>

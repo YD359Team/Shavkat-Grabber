@@ -7,8 +7,22 @@
         <Setter Property="OffContent" Value="" />
     </Style>
     <Style Selector="controls|ImgButton">
-        <Setter Property="Background" Value="#cccccc" />
+        <Setter Property="Background" Value="#dddddd" />
         <Setter Property="BorderBrush" Value="Black" />
         <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.Flat">
+        <Setter Property="Background" Value="#dddddd" />
+        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="4 2" />
+    </Style>
+    <Style Selector="Button.Flat:focus">
+        <Setter Property="BorderBrush" Value="DodgerBlue" />
+    </Style>
+    <Style Selector="TextBox.Multiline">
+        <Setter Property="AcceptsTab" Value="True" />
+        <Setter Property="AcceptsReturn" Value="True" />
+        <Setter Property="IsUndoEnabled" Value="True" />
     </Style>
 </Styles>

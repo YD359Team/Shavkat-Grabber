@@ -15,6 +15,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:m="using:Shavkat_grabber.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tree="using:Shavkat_grabber.Models.Tree"
     xmlns:vm="using:Shavkat_grabber.ViewModels"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
@@ -33,7 +34,7 @@
             <Setter Property="BorderBrush" Value="Gray" />
         </Style>
         <Style Selector="TreeViewItem">
-            <Setter Property="IsExpanded" Value="{Binding (m:TreeViewNodeGroup).IsExpanded}" />
+            <Setter Property="IsExpanded" Value="{Binding (tree:TreeViewNodeGroup).IsExpanded}" />
         </Style>
     </Window.Styles>
 
@@ -95,7 +96,7 @@
 
                     <controls:ImgButton
                         BorderBrush="CornflowerBlue"
-                        Command="{Binding CreatePost}"
+                        Command="{Binding ShowDatabaseWindow}"
                         Content="База данных"
                         FontSize="16"
                         HorizontalContentAlignment="Center"
@@ -154,7 +155,8 @@
                     Grid.Column="1"
                     Height="130"
                     ItemsSource="{Binding LogMessages}"
-                    Name="ListboxLog">
+                    Name="ListboxLog"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible">
                     <ListBox.Styles>
                         <Style Selector="ListBoxItem">
                             <Setter Property="Padding" Value="0" />
@@ -210,10 +212,10 @@
                         ScrollViewer.AllowAutoHide="False"
                         ScrollViewer.VerticalScrollBarVisibility="Visible">
                         <TreeView.DataTemplates>
-                            <TreeDataTemplate DataType="m:TreeViewNodeGroup" ItemsSource="{Binding Children}">
+                            <TreeDataTemplate DataType="tree:TreeViewNodeGroup" ItemsSource="{Binding Children}">
                                 <TextBlock Text="{Binding Title}" />
                             </TreeDataTemplate>
-                            <TreeDataTemplate DataType="m:TreeViewNodeItem">
+                            <TreeDataTemplate DataType="tree:TreeViewNodeItem">
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox
                                         Content="{Binding Title}"

@@ -16,6 +16,7 @@ using Shavkat_grabber.Helpers;
 using Shavkat_grabber.Logic;
 using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Models;
+using Shavkat_grabber.Models.Tree;
 using Shavkat_grabber.Views;
 
 namespace Shavkat_grabber.ViewModels;
@@ -276,5 +277,16 @@ public class MainWindowViewModel : ViewModelBase
     public void ConsoleClear()
     {
         LogMessages.Clear();
+    }
+
+    public async void ShowDatabaseWindow()
+    {
+        DatabaseWindow databaseWindow = new();
+        databaseWindow.DataContext = new DatabaseWindowViewModel(
+            _fsManager,
+            _winManager,
+            _settings
+        );
+        await databaseWindow.ShowDialog(this._winManager.MainWindow);
     }
 }

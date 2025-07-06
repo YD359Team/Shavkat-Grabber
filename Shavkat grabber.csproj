@@ -26,6 +26,10 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.1" />
+    <PackageReference
+      Include="Microsoft.EntityFrameworkCore"
+      Version="10.0.0-preview.5.25277.114"
+    />
     <PackageReference Include="Microsoft.Playwright" Version="1.51.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="RestSharp" Version="112.1.1-alpha.0.4" />
