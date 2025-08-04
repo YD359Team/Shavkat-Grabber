@@ -4,8 +4,9 @@ public class TreeViewNodeItem : TreeViewNode
 {
     public bool IsChecked { get; set; }
 
-    public TreeViewNodeItem(string title)
+    public TreeViewNodeItem(int id, string title)
     {
+        Id = id;
         Title = title;
     }
 }

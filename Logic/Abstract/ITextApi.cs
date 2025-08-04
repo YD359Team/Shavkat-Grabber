@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Shavkat_grabber.Pattern;
+using Shavkat_grabber.Logic.Pattern;
 
 namespace Shavkat_grabber.Logic.Abstract;
 

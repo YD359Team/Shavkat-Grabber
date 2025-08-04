@@ -16,9 +16,9 @@ using Shavkat_grabber.Extensions;
 using Shavkat_grabber.Logic;
 using Shavkat_grabber.Logic.Abstract;
 using Shavkat_grabber.Logic.API;
+using Shavkat_grabber.Logic.Pattern;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Models.Json;
-using Shavkat_grabber.Pattern;
 using Shavkat_grabber.Views;
 using YDs_DLL_BASE.Extensions;
 
@@ -29,7 +29,7 @@ public class PostingWindowViewModel : ChildViewModel
     private readonly GigaChatApi _gigaChatApi;
     private readonly TelegramBotApi _telegram;
 
-    private readonly Good[] _goods;
+    private readonly Product[] _goods;
 
     public bool IsAsyncDataLoaded
     {
@@ -49,7 +49,7 @@ public class PostingWindowViewModel : ChildViewModel
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public int ImageLoaded
+    public int ImageLoadedCount
     {
         get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
@@ -73,19 +73,25 @@ public class PostingWindowViewModel : ChildViewModel
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public bool PostTelegram
+    public bool HasCriticalError
     {
         get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public bool PostPinterest
+    public bool CompletePostTelegram
     {
         get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
-    public bool PostTiktok
+    public bool CompletePostPinterest
+    {
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    public bool CompletePostTiktok
     {
         get => field;
         set => this.RaiseAndSetIfChanged(ref field, value);
@@ -100,7 +106,7 @@ public class PostingWindowViewModel : ChildViewModel
         FileSystemManager fsManager,
         WindowManager manager,
         AppSettings appSettings,
-        Good[] goods
+        Product[] goods
     )
         : base(fsManager, manager, appSettings)
     {
@@ -114,14 +120,16 @@ public class PostingWindowViewModel : ChildViewModel
     private async Task InitAsyncData()
     {
         IsGigaChatApiConnected = true;
+
         Task tgBotTask = TgBotTask();
+        if (HasCriticalError)
+            return;
+
         Task getImages = GetImagesFromGoods();
 
         await Task.WhenAll(tgBotTask, getImages);
 
-        //Attachments.Sort();
-
-        while (ImageLoaded < _goods.Length)
+        while (ImageLoadedCount < _goods.Length)
         {
             await Task.Delay(200);
         }
@@ -133,18 +141,35 @@ public class PostingWindowViewModel : ChildViewModel
 
         // текст
         await CreateText();
+        if (HasCriticalError)
+            return;
 
         IsAsyncDataLoaded = true;
     }
 
     private async Task CreateText()
     {
-        // TODO: убрано всё
-        /*TextController tc = new();
-        // ставить false для дебага
-        var result = await tc.CreateTextVariantsAsync(Settings, _goods, _gigaChatApi, false);
-        PostTextTg = result.Value.Markdown;
-        PostTextOther = result.Value.PlainText;*/
+        StringBuilder builder = new();
+        builder.AppendLine();
+        for (var index = 0; index < _goods.Length; index++)
+        {
+            var good = _goods[index];
+            builder.Append(good.Title);
+            if (index + 1 < _goods.Length)
+                builder.Append("; ");
+        }
+        var result = await _gigaChatApi.GetTextResultAsync(
+            "Составь одно короткое описание этих товаров для поста без форматирования: " + builder
+        );
+
+        if (!result.IsSuccess)
+        {
+            HasCriticalError = true;
+            await WinManager.ShowError(result.Error);
+            return;
+        }
+
+        PostText = string.Join("\n", [Settings.StaticHeader, result.Value, Settings.StaticFooter]);
     }
 
     private void CreateCollage()
@@ -166,7 +191,14 @@ public class PostingWindowViewModel : ChildViewModel
 
     private async Task TgBotTask()
     {
-        IsTgBotConnected = await _telegram.CheckConnection();
+        var result = await _telegram.CheckConnection();
+        IsTgBotConnected = result.IsSuccess;
+
+        if (!IsTgBotConnected)
+        {
+            HasCriticalError = true;
+            await WinManager.ShowError(result.Error);
+        }
     }
 
     private async Task GetImagesFromGoods()
@@ -192,7 +224,7 @@ public class PostingWindowViewModel : ChildViewModel
 
             // Заменяем существующий элемент (чтобы не нарушать порядок)
             Attachments[index - 1] = new PreviewImage(index, image);
-            ImageLoaded++;
+            ImageLoadedCount++;
         }
         catch (Exception ex)
         {
@@ -212,30 +244,35 @@ public class PostingWindowViewModel : ChildViewModel
         try
         {
             IsAsyncDataLoaded = false;
+            TextController textController = new();
+#if DEBUG
+            int tgPostId = 84;
+            CompletePostTelegram = true;
+#else
 
-            int tgPostId = 0;
+            Result<int> result = await _telegram.Post(
+                textController.AddMarkdownLinks(PostText, _goods),
+                Attachments.Select(x => x.Image).ToArray()
+            );
+            CompletePostTelegram = result.IsSuccess;
 
-            if (PostTelegram)
+            int tgPostId = result.Value;
+#endif
+
+            string otherPostText = textController.AddLinkToTelegram(PostText, Settings, tgPostId);
+
+            if (CompletePostTelegram)
             {
-                Result<int> result = await _telegram.Post(
-                    PostText,
-                    Attachments.Select(x => x.Image).ToArray()
-                );
-                tgPostId = result.Value;
-            }
-
-            if (PostPinterest)
-            {
-                //if (tgPostId < 1) throw new Exception("Требуется отправить Telegram пост перед Pinterest");
-
-                string tgPostUrl = $"https://t.me/{Settings.TgChannelId[1..]}/{tgPostId}";
-
                 string collagePath = FsManager.SaveBitmapInTempAndGetFullPath(Collage);
-                using PinterestDriver driver = await DriverBase.CreateAsync<PinterestDriver>(
-                    FsManager,
-                    Settings
+                PinterestDriver driver = new PinterestDriver();
+                await driver.InitializeAsync(Settings);
+                await driver.LoginAsync(Settings.PinterestEmail, Settings.PinterestPassword);
+                await driver.CreatePinWithUniversalSelectorsAsync(
+                    collagePath,
+                    "Тестовый заголовок",
+                    otherPostText
                 );
-                await driver.PostInPinterest(PostText, collagePath);
+                await driver.CloseAsync();
             }
         }
         catch (Exception ex)
@@ -246,26 +283,6 @@ public class PostingWindowViewModel : ChildViewModel
         {
             IsAsyncDataLoaded = true;
         }
-    }
-
-    public void PastImage(object bmpData)
-    {
-        Bitmap bmp;
-        if (bmpData is MemoryStream stream)
-        {
-            stream.Position = 0;
-            bmp = new Bitmap(stream);
-        }
-        else if (bmpData is byte[] bytes)
-        {
-            using var memoryStream = new MemoryStream(bytes);
-            bmp = new Bitmap(memoryStream);
-        }
-        else
-        {
-            throw new NotImplementedException(bmpData.GetType().ToString());
-        }
-        Attachments.Add(new PreviewImage(Attachments.Count + 1, bmp));
     }
 
     public async void RemoveBgAttachAll()
@@ -341,25 +358,6 @@ public class PostingWindowViewModel : ChildViewModel
         attachment.Save(baseName);
 
         return (baseName, targetName);
-    }
-
-    public void RemoveAttach(object e)
-    {
-        PreviewImage prev = (PreviewImage)e;
-        Attachments.Remove(prev);
-    }
-
-    public async void CopyAttach(object e)
-    {
-        PreviewImage prev = (PreviewImage)e;
-        Bitmap bmp = prev.Image;
-        using var stream = new MemoryStream();
-        bmp.Save(stream);
-        stream.Position = 0;
-
-        DataObject obj = new();
-        obj.Set("image/png", stream.ToArray());
-        await WinManager.MainWindow.Clipboard.SetDataObjectAsync(obj);
     }
 
     public async void SaveAllPreview()

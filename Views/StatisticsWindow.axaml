@@ -1,11 +1,12 @@
 ﻿<Window
-    Title="DatabaseWindow"
+    Title="StatisticsWindow"
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d"
-    x:Class="Shavkat_grabber.Views.DatabaseWindow"
-    x:DataType="vm:DatabaseWindowViewModel"
+    x:Class="Shavkat_grabber.Views.StatisticsWindow"
+    x:DataType="vm:StatisticsWindowViewModel"
     xmlns="https://github.com/avaloniaui"
+    xmlns:avalonia="http://oxyplot.org/avalonia"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:Shavkat_grabber.ViewModels"
@@ -18,7 +19,9 @@
             <Border DockPanel.Dock="Bottom">
                 <TextBlock Text="bot" />
             </Border>
-            <DataGrid />
+            <Border>
+                <avalonia:PlotView Model="{Binding PlotModel}" />
+            </Border>
         </DockPanel>
     </Border>
 </Window>

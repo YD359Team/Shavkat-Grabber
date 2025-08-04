@@ -1,6 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.ReactiveUI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Shavkat_grabber.Logic.Db;
 
 namespace Shavkat_grabber;
 
@@ -9,8 +16,7 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
-        Console.WriteLine($"args length: {args?.Length ?? 0}");
+        SQLitePCL.Batteries.Init();
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

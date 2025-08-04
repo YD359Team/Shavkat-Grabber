@@ -20,7 +20,7 @@ public class WbDriver : DriverBase
     public event LogMessageDelegate OnLogMessage;
     public event EventHandler OnScaningEnd;
 
-    public async IAsyncEnumerable<Good> StartGrab(string[] keyWords, int count)
+    public async IAsyncEnumerable<Product> StartGrab(string[] keyWords, int count)
     {
         await _page.GotoAsync("https://www.wildberries.ru/");
         await Task.Delay(250);
@@ -86,7 +86,7 @@ public class WbDriver : DriverBase
         OnScaningEnd?.Invoke(this, EventArgs.Empty);
     }
 
-    private async Task<Good?> TryGrabGood(IPage goodPage, string url)
+    private async Task<Product?> TryGrabGood(IPage goodPage, string url)
     {
         try
         {
@@ -113,7 +113,7 @@ public class WbDriver : DriverBase
                 )?.GetAttributeAsync("src") ?? "N/A";
             SendLogMessage(new LogMessage($"- image url", LogMessageTypes.Success));
 
-            Good good = new Good
+            Product good = new Product
             {
                 Article = article,
                 Url = url,

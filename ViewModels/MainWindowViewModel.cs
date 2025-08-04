@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Controls.Models.TreeDataGrid;
 using Avalonia.Controls.Notifications;
-using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using Avalonia.VisualTree;
 using DynamicData;
 using ReactiveUI;
 using Shavkat_grabber.Helpers;
 using Shavkat_grabber.Logic;
 using Shavkat_grabber.Logic.Abstract;
+using Shavkat_grabber.Logic.Db;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Models.Tree;
 using Shavkat_grabber.Views;
@@ -23,69 +23,40 @@ namespace Shavkat_grabber.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
-    private FileSystemManager _fsManager;
-    private WindowManager _winManager;
+    private readonly FileSystemManager _fsManager;
+    private readonly WindowManager _winManager;
     private AppSettings _settings;
+    private readonly AppStartParams _appStartParams;
 
-    public List<TreeViewNode> Root { get; } =
-        [
-            new TreeViewNodeGroup(
-                "Для неё",
-                new TreeViewNodeItem("Ароматические свечи"),
-                new TreeViewNodeItem("Шоколад ручной работы"),
-                new TreeViewNodeItem("Бомбочки для ванны"),
-                new TreeViewNodeItem("Скраб/ Крем для тела"),
-                new TreeViewNodeItem("Крем для рук"),
-                new TreeViewNodeItem("Чашка"),
-                new TreeViewNodeItem("Чай"),
-                new TreeViewNodeItem("Мини-заварник для чая"),
-                new TreeViewNodeItem("Средства для волос"),
-                new TreeViewNodeItem("Маски для лица"),
-                new TreeViewNodeItem("Мыло ручной работы"),
-                new TreeViewNodeItem("Косметичка"),
-                new TreeViewNodeItem("Расческа"),
-                new TreeViewNodeItem("Шелковые наволочки"),
-                new TreeViewNodeItem("Заколки"),
-                new TreeViewNodeItem("Ободки / повязки на голову для умывания"),
-                new TreeViewNodeItem("Соль дня ванной"),
-                new TreeViewNodeItem("Арома-масла"),
-                new TreeViewNodeItem("Патчи для глаз"),
-                new TreeViewNodeItem("Тапочки")
-            ),
-            new TreeViewNodeGroup(
-                "Для него",
-                new TreeViewNodeItem("Кружки / термостаканы"),
-                new TreeViewNodeItem("Чай"),
-                new TreeViewNodeItem("Шоколад"),
-                new TreeViewNodeItem("Техника (например, беспроводное зарядное устройство)"),
-                new TreeViewNodeItem("Аксессуары для компьютера"),
-                new TreeViewNodeItem("Аксессуары в авто"),
-                new TreeViewNodeItem("Мужские украшения"),
-                new TreeViewNodeItem("Мужская косметика"),
-                new TreeViewNodeItem("Галстук/ галстук-бабочка"),
-                new TreeViewNodeItem("Настольная игра")
-            ),
-            new TreeViewNodeGroup(
-                "Для дома",
-                new TreeViewNodeItem("Постеры"),
-                new TreeViewNodeItem("Ковер"),
-                new TreeViewNodeItem("Ароматы для дома"),
-                new TreeViewNodeItem("Керамика"),
-                new TreeViewNodeItem("Гирлянда")
-            ),
-        ];
+    public List<TreeViewNode> Root { get; private set; }
+    ObservableCollection<ProductChecked> _items = new();
+    public FlatTreeDataGridSource<ProductChecked> ItemsSource { get; }
 
-    ObservableCollection<GoodItem> _items = new();
-    public FlatTreeDataGridSource<GoodItem> ItemsSource { get; }
+    private int _dataToLoadCount = 2;
 
-    private bool _isLoading;
+    /// <summary>
+    /// Загружены для все данные для работы программы
+    /// </summary>
+    public bool IsAllDataLoaded
+    {
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
+    }
+
+    /// <summary>
+    /// Запущено ли в данный момент сканирование
+    /// </summary>
     public bool IsLoading
     {
-        get => _isLoading;
-        set => this.RaiseAndSetIfChanged(ref _isLoading, value);
+        get => field;
+        set => this.RaiseAndSetIfChanged(ref field, value);
     }
 
     private int _selectedCount = 1;
+
+    /// <summary>
+    /// Сколько товаров выбранных категорий сканировать
+    /// </summary>
     public int SelectedCount
     {
         get => _selectedCount;
@@ -93,6 +64,10 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     private int _checkedCount;
+
+    /// <summary>
+    /// Сколько ключевых слов для сканирования выбрано
+    /// </summary>
     public int CheckedCount
     {
         get => _checkedCount;
@@ -103,15 +78,16 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel() { }
 
-    public MainWindowViewModel(MainWindow mainWindow)
+    public MainWindowViewModel(MainWindow mainWindow, AppStartParams appStartParams)
     {
-        LoadSettingsOrCreate();
+        LoadSettingsOrCreateAsync();
+        LoadGroupsAndKeywordsAsync();
 
-        ItemsSource = new FlatTreeDataGridSource<GoodItem>(_items)
+        ItemsSource = new FlatTreeDataGridSource<ProductChecked>(_items)
         {
             Columns =
             {
-                new CheckBoxColumn<GoodItem>(
+                new CheckBoxColumn<ProductChecked>(
                     "✅",
                     x => x.IsChecked,
                     (x, o) =>
@@ -123,29 +99,31 @@ public class MainWindowViewModel : ViewModelBase
                             CheckedCount--;
                     }
                 ),
-                new TextColumn<GoodItem, string>("Артикул", x => x.Good.Article),
-                new TextColumn<GoodItem, string>("Название", x => x.Good.Title),
-                new TextColumn<GoodItem, string>("Цена", x => x.Good.Price),
-                new TextColumn<GoodItem, string>("URL", x => x.Good.Url),
-                new TextColumn<GoodItem, string>("Фото", x => x.Good.ImageUrl),
+                new TextColumn<ProductChecked, string>("Артикул", x => x.Good.Article),
+                new TextColumn<ProductChecked, string>("Название", x => x.Good.Title),
+                new TextColumn<ProductChecked, string>("Цена", x => x.Good.Price),
+                new TextColumn<ProductChecked, string>("URL", x => x.Good.Url),
+                new TextColumn<ProductChecked, string>("Фото", x => x.Good.ImageUrl),
             },
         };
 
         _fsManager = new();
         _winManager = new(mainWindow);
+        _appStartParams = appStartParams;
 
 #if DEBUG
-        GoodItem[] items =
+        ProductChecked[] items =
         [
             new(DebugHelper.GetTestGood()) { IsChecked = true },
             new(DebugHelper.GetTestGood()) { IsChecked = true },
         ];
         _items.AddRange(items);
         CheckedCount += items.Length;
+        LogMessages.Add(new LogMessage("Загружены тестовые товары (2)", LogMessageTypes.Success));
 #endif
     }
 
-    private void LoadSettingsOrCreate()
+    private async Task LoadSettingsOrCreateAsync()
     {
         if (!File.Exists("settings.json"))
         {
@@ -153,8 +131,24 @@ public class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        string json = File.ReadAllText("settings.json");
+        string json = await File.ReadAllTextAsync("settings.json");
         _settings = SerializeHelper.Deserialize<AppSettings>(json);
+
+        if (Interlocked.Decrement(ref _dataToLoadCount) == 0)
+        {
+            IsAllDataLoaded = true;
+        }
+    }
+
+    private async Task LoadGroupsAndKeywordsAsync()
+    {
+        Root = new(await new DbManager().LoadGroupsOrCreateIfNotExist());
+        this.RaisePropertyChanged(nameof(Root));
+
+        if (Interlocked.Decrement(ref _dataToLoadCount) == 0)
+        {
+            IsAllDataLoaded = true;
+        }
     }
 
     public async Task Start()
@@ -176,7 +170,7 @@ public class MainWindowViewModel : ViewModelBase
         driver.OnScaningEnd += OnDriverOnOnScaningEnd;
         await foreach (var item in driver.StartGrab(keyWords, SelectedCount))
         {
-            _items.Add(new GoodItem(item) { IsChecked = true });
+            _items.Add(new ProductChecked(item) { IsChecked = true });
             CheckedCount++;
         }
         driver.OnLogMessage -= OnLogMessage;
@@ -227,7 +221,7 @@ public class MainWindowViewModel : ViewModelBase
 
     public async void CreatePost()
     {
-        Good[] goods = _items.Where(x => x.IsChecked).Select(x => x.Good).ToArray();
+        Product[] goods = _items.Where(x => x.IsChecked).Select(x => x.Good).ToArray();
 
         PostingWindow tgPostWindow = new();
         tgPostWindow.DataContext = new PostingWindowViewModel(
@@ -281,12 +275,51 @@ public class MainWindowViewModel : ViewModelBase
 
     public async void ShowDatabaseWindow()
     {
-        DatabaseWindow databaseWindow = new();
-        databaseWindow.DataContext = new DatabaseWindowViewModel(
+        StatisticsWindow databaseWindow = new();
+        databaseWindow.DataContext = new StatisticsWindowViewModel(
             _fsManager,
             _winManager,
             _settings
         );
         await databaseWindow.ShowDialog(this._winManager.MainWindow);
+    }
+
+    public async void OnAddGroupClick(object eText)
+    {
+        string? gpName = eText?.ToString();
+        if (gpName is null)
+            return;
+
+        var result = await _winManager.Question(
+            $"Добавить группу \"{gpName}\"?",
+            DialogResultButtons.Yes | DialogResultButtons.Cancel
+        );
+
+        if (result != DialogResultButtons.Yes)
+            return;
+
+        var gpNode = new TreeViewNodeGroup(gpName);
+        Root.Add(gpNode);
+        Group group = new(gpName);
+        int id = await new DbManager().AddGroupAsync(group);
+        gpNode.Id = id;
+        Root.Add(gpNode);
+    }
+
+    public async void OnAddKeywordClick(object eGroupNode)
+    {
+        var kwResult = await _winManager.ShowEditForm(WindowManager.EditMode.Add);
+        if (!kwResult.IsSuccess)
+            return;
+
+        TreeViewNodeGroup gpNode = (TreeViewNodeGroup)eGroupNode;
+        DbManager db = new DbManager();
+        Group? gp = await db.FindGroupById(gpNode.Id);
+
+        Keyword kw = new(0, gp.Id, kwResult.Value);
+        int id = await db.AddKeywordAsync(kw);
+
+        TreeViewNodeItem kwNode = new(id, kwResult.Value);
+        gpNode.Children.Add(kwNode);
     }
 }

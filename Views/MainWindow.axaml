@@ -1,7 +1,7 @@
 <Window
     Height="768"
     Icon="/Assets/PNG/SG_Logo_128.png"
-    Title="Shavkat Grabber"
+    Title="SG"
     Width="1300"
     WindowStartupLocation="CenterScreen"
     d:DesignHeight="768"
@@ -54,8 +54,14 @@
                         FontSize="16"
                         HorizontalContentAlignment="Center"
                         ImgSource="../Assets/PNG/start-64.png"
-                        ImgWidth="25"
-                        IsEnabled="{Binding !IsLoading}" />
+                        ImgWidth="25">
+                        <controls:ImgButton.IsEnabled>
+                            <MultiBinding>
+                                <Binding Path="!IsLoading" />
+                                <Binding Path="IsAllDataLoaded" />
+                            </MultiBinding>
+                        </controls:ImgButton.IsEnabled>
+                    </controls:ImgButton>
 
                     <controls:ImgButton
                         BorderBrush="#29B6F6"
@@ -97,10 +103,10 @@
                     <controls:ImgButton
                         BorderBrush="CornflowerBlue"
                         Command="{Binding ShowDatabaseWindow}"
-                        Content="База данных"
+                        Content="Статистика"
                         FontSize="16"
                         HorizontalContentAlignment="Center"
-                        ImgSource="../Assets/PNG/storage-48.png"
+                        ImgSource="../Assets/PNG/graph-47.png"
                         ImgWidth="25"
                         IsEnabled="{Binding !IsLoading}" />
                 </StackPanel>
@@ -207,24 +213,71 @@
             <Grid ColumnDefinitions="220,*">
                 <!--  Категории  -->
                 <Border Grid.Column="0">
-                    <TreeView
-                        ItemsSource="{Binding Root}"
-                        ScrollViewer.AllowAutoHide="False"
-                        ScrollViewer.VerticalScrollBarVisibility="Visible">
-                        <TreeView.DataTemplates>
-                            <TreeDataTemplate DataType="tree:TreeViewNodeGroup" ItemsSource="{Binding Children}">
-                                <TextBlock Text="{Binding Title}" />
-                            </TreeDataTemplate>
-                            <TreeDataTemplate DataType="tree:TreeViewNodeItem">
-                                <StackPanel Orientation="Horizontal">
-                                    <CheckBox
-                                        Content="{Binding Title}"
-                                        FontSize="11"
-                                        IsChecked="{Binding IsChecked}" />
-                                </StackPanel>
-                            </TreeDataTemplate>
-                        </TreeView.DataTemplates>
-                    </TreeView>
+                    <Grid RowDefinitions="Auto,*">
+                        <Border Grid.Row="0">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox
+                                    Grid.Column="0"
+                                    Name="tbNewGpName"
+                                    Watermark="Новая группа" />
+                                <Button
+                                    Command="{Binding OnAddGroupClick}"
+                                    CommandParameter="{Binding #tbNewGpName.Text}"
+                                    DataContext="{Binding $parent[Window].DataContext}"
+                                    Grid.Column="1"
+                                    Height="32"
+                                    Padding="0"
+                                    Width="32"
+                                    x:DataType="vm:MainWindowViewModel">
+                                    <Image Source="../Assets/PNG/add-48.png" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <TreeView
+                            Grid.Row="1"
+                            ItemsSource="{Binding Root}"
+                            ScrollViewer.AllowAutoHide="False"
+                            ScrollViewer.VerticalScrollBarVisibility="Visible">
+                            <TreeView.DataTemplates>
+                                <!--  Группы  -->
+                                <TreeDataTemplate DataType="tree:TreeViewNodeGroup" ItemsSource="{Binding Children}">
+                                    <StackPanel Orientation="Horizontal" Spacing="3">
+                                        <TextBlock
+                                            FontSize="10"
+                                            Foreground="Gray"
+                                            Text="{Binding Id, StringFormat='#{0}'}"
+                                            VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+                                        <Button
+                                            Background="Transparent"
+                                            Command="{Binding OnAddKeywordClick}"
+                                            CommandParameter="{Binding $parent.DataContext}"
+                                            DataContext="{Binding $parent[Window].DataContext}"
+                                            Height="25"
+                                            Padding="0"
+                                            Width="25"
+                                            x:DataType="vm:MainWindowViewModel">
+                                            <Image Source="../Assets/PNG/add-48.png" />
+                                        </Button>
+                                    </StackPanel>
+                                </TreeDataTemplate>
+                                <!--  Ключевые слова  -->
+                                <TreeDataTemplate DataType="tree:TreeViewNodeItem">
+                                    <StackPanel Orientation="Horizontal" Spacing="3">
+                                        <TextBlock
+                                            FontSize="10"
+                                            Foreground="Gray"
+                                            Text="{Binding Id, StringFormat='#{0}'}"
+                                            VerticalAlignment="Center" />
+                                        <CheckBox
+                                            Content="{Binding Title}"
+                                            FontSize="11"
+                                            IsChecked="{Binding IsChecked}" />
+                                    </StackPanel>
+                                </TreeDataTemplate>
+                            </TreeView.DataTemplates>
+                        </TreeView>
+                    </Grid>
                 </Border>
 
                 <!--  Результаты парсинга  -->

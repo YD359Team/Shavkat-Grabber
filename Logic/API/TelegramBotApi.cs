@@ -3,8 +3,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
+using Shavkat_grabber.Logic.Pattern;
 using Shavkat_grabber.Models;
-using Shavkat_grabber.Pattern;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -71,16 +71,16 @@ public class TelegramBotApi
         }
     }
 
-    public async Task<bool> CheckConnection()
+    public async Task<Result> CheckConnection()
     {
         try
         {
             User me = await _client.GetMe();
-            return true;
+            return Result.Success();
         }
-        catch
+        catch (Exception ex)
         {
-            return false;
+            return Result.Fail(ex);
         }
     }
 

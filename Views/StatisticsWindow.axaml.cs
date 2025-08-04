@@ -4,9 +4,9 @@ using Avalonia.Markup.Xaml;
 
 namespace Shavkat_grabber.Views;
 
-public partial class DatabaseWindow : Window
+public partial class StatisticsWindow : Window
 {
-    public DatabaseWindow()
+    public StatisticsWindow()
     {
         InitializeComponent();
     }

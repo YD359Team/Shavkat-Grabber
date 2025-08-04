@@ -12,7 +12,7 @@ namespace Shavkat_grabber.Views;
 
 public partial class MainWindow : Window
 {
-    INotificationManager manager = new WindowNotificationManager();
+    private INotificationManager manager = new WindowNotificationManager();
 
     public MainWindow()
     {
@@ -26,7 +26,7 @@ public partial class MainWindow : Window
         manager = new WindowNotificationManager(this)
         {
             Position = NotificationPosition.TopRight, // Положение уведомления
-            MaxItems = 6 // Максимальное количество одновременно отображаемых уведомлений
+            MaxItems = 6, // Максимальное количество одновременно отображаемых уведомлений
         };
     }
 
@@ -42,7 +42,6 @@ public partial class MainWindow : Window
 
     public void ShowNotification(string title, string msg, NotificationType type)
     {
-        manager.Show(new Notification(
-            title, msg, type, TimeSpan.FromSeconds(5)));
+        manager.Show(new Notification(title, msg, type, TimeSpan.FromSeconds(5)));
     }
 }

@@ -10,7 +10,7 @@ namespace Shavkat_grabber.Logic;
 
 public class Exporter
 {
-    public async Task ToCsv(IEnumerable<Good> goods, string filePath)
+    public async Task ToCsv(IEnumerable<Product> goods, string filePath)
     {
         await using StreamWriter sw = new StreamWriter(filePath);
         foreach (var item in goods)
@@ -22,7 +22,7 @@ public class Exporter
         sw.Close();
     }
 
-    public async Task ToXlsx(IEnumerable<Good> goods, string filePath)
+    public async Task ToXlsx(IEnumerable<Product> goods, string filePath)
     {
         int row = 1;
         using var writer = new SwiftExcel.ExcelWriter(filePath);

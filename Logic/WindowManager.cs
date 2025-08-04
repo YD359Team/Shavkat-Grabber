@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using Shavkat_grabber.Extensions;
+using Shavkat_grabber.Logic.Pattern;
 using Shavkat_grabber.Models;
 using Shavkat_grabber.Views;
 using Shavkat_grabber.Views.Dialogs;
@@ -98,11 +99,43 @@ public class WindowManager
         return WebUtility.UrlDecode(files.First().Path.AbsolutePath);
     }
 
-    public async Task<string> Question(string question, string[] answers)
+    private readonly DialogResultButtons[] _buttons =
+    [
+        DialogResultButtons.Cancel,
+        DialogResultButtons.Ok,
+        DialogResultButtons.Yes,
+        DialogResultButtons.No,
+    ];
+
+    private string Button2Text(DialogResultButtons btn)
     {
-        QuestionWindow wnd = new QuestionWindow();
-        wnd.DataContext = new Question(question, answers);
-        return await wnd.ShowDialog<string>(_mainWindow);
+        return btn switch
+        {
+            DialogResultButtons.Ok => "Ок",
+            DialogResultButtons.Cancel => "Отмена",
+            DialogResultButtons.Yes => "Да",
+            DialogResultButtons.No => "Нет",
+            _ => throw new ArgumentOutOfRangeException(nameof(btn), btn, null),
+        };
+    }
+
+    public async Task<DialogResultButtons> Question(string question, DialogResultButtons buttons)
+    {
+        string[] btnsText = _buttons.Where(x => buttons.HasFlag(x)).Select(Button2Text).ToArray();
+        QuestionWindow wnd = new(question, btnsText);
+        return await wnd.ShowDialog<DialogResultButtons>(_mainWindow);
+    }
+
+    public async Task<Result<string>> ShowEditForm(EditMode mode, string content = null)
+    {
+        EditTextWindow wnd = mode switch
+        {
+            EditMode.Add => new("Создание", content),
+            EditMode.Edit => new("Редактирование", content),
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), mode, null),
+        };
+
+        return await wnd.ShowDialog<Result<string>>(_mainWindow);
     }
 
     public enum FileFormats
@@ -112,4 +145,19 @@ public class WindowManager
         Png,
         Json,
     }
+
+    public enum EditMode
+    {
+        Add,
+        Edit,
+    }
+}
+
+[Flags]
+public enum DialogResultButtons
+{
+    Cancel = 1,
+    Ok = Cancel << 1,
+    Yes = Cancel << 2,
+    No = Cancel << 3,
 }

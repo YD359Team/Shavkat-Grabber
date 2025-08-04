@@ -7,6 +7,9 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.TreeDataGrid/Themes/Fluent.axaml" />
+
+        <StyleInclude Source="avares://OxyPlot.Avalonia/Themes/Default.axaml" />
+
         <StyleInclude Source="Styles/ImgButtonTheme.axaml" />
         <StyleInclude Source="Styles/Common.axaml" />
     </Application.Styles>

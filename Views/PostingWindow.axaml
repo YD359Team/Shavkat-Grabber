@@ -71,7 +71,7 @@
                                             ToolTip.Tip="Загружено изображений"
                                             Width="32" />
                                         <StackPanel IsVisible="{Binding !IsImagesLoaded}" Orientation="Horizontal">
-                                            <TextBlock Text="{Binding ImageLoaded}" />
+                                            <TextBlock Text="{Binding ImageLoadedCount}" />
                                             <TextBlock Text="\" />
                                             <TextBlock Text="{Binding Attachments.Count}" />
                                         </StackPanel>
