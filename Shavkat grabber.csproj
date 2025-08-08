@@ -7,7 +7,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ApplicationIcon>SG_Logo.ico</ApplicationIcon>
-    <AssemblyVersion>0.0.5a</AssemblyVersion>
+    <AssemblyVersion>0.0.6</AssemblyVersion>
     <Company>Evur Team</Company>
     <LangVersion>preview</LangVersion>
   </PropertyGroup>
